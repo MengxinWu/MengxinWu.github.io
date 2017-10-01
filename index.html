@@ -61,6 +61,261 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-JS-Event" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/01/JS-Event/" class="article-date">
+  <time datetime="2017-10-01T00:25:26.000Z" itemprop="datePublished">2017-10-01</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/01/JS-Event/">JS-Event</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="事件处理程序"><a href="#事件处理程序" class="headerlink" title="事件处理程序"></a>事件处理程序</h1><ol>
+<li><p>HTML事件处理程序（没人用了）；</p>
+</li>
+<li><p>DOM 0级事件处理程序，每一个事件只支持一个事件处理程序；</p>
+</li>
+<li><p>IE事件处理程序（看见IE就烦）；</p>
+</li>
+<li><p>DOM 2级事件处理程序（默认使用）。</p>
+</li>
+</ol>
+<p>既然事件处理程序有这么多类型，自然考虑要封装一下，写一个<strong>跨浏览器的事件处理程序</strong>，以上三种方式（第一种不考虑）的优先级：先判断DOM 2级方法，再判断IE方法，最后是DOM 0级方法。</p>
+<h2 id="跨浏览器的事件处理程序"><a href="#跨浏览器的事件处理程序" class="headerlink" title="跨浏览器的事件处理程序"></a>跨浏览器的事件处理程序</h2><p>直接上代码，来源于红宝书。</p>
+<pre><code>var EventUtil = {
+  // 添加事件处理程序
+  addHandler: function(element, type, handler) {
+    // 先判断DOM 2级方法
+    if(element.addEventListener) {
+      // false 表示冒泡阶段调用事件处理程序
+      element.addEventListener(type, handler, false);
+    }
+    // 再判断IE方法
+    else if(element.attachEvent) {
+      // IE方法，事件类型需要加上前缀‘on’
+      element.attachEvent(&apos;on&apos;+type, handler);
+    }
+    // 最后判断DOM 0级方法，一个事件只支持一个事件处理程序
+    else {
+      element[&apos;on&apos;+type] = handler;
+    }
+  },
+  // 移除事件处理程序
+  removeHandler: function(element, type, handler) {
+    if(element.removeEventListener) {
+      element.removeEventListener(type, handler, false);
+    } else if(element.detachEvent) {
+      element.detachEvent(&apos;on&apos;+type, handler);
+    } else {
+      element[&apos;on&apos;+type] = null;
+    }
+  }
+};
+</code></pre><p>以上代码可以作为跨浏览器的事件处理程序，添加事件处理程序如下：</p>
+<pre><code>var btn = document.getElementById(&apos;myBtn&apos;);
+var handler = function() {
+  console.log(&apos;Clicked.&apos;);
+};
+EventUtil.addHandler(btn, &apos;click&apos;, handler);
+</code></pre><p>给button元素的‘click’事件添加了一个事件处理程序，点击button会打印‘Clicked.’，移除事件处理程序如下：</p>
+<pre><code>EventUtil.removeHandler(btn, &apos;click&apos;, handler);
+</code></pre><p>以上代码运行在chorme浏览器，添加和移除事件处理程序都是使用<strong>DOM 2级方法</strong>。IE浏览器8以上也是用DOM 2级方法，8以下（包括8）使用的是IE方法（亲测）。下面就回过头来仔细说说前面几种不同的方法。</p>
+<h2 id="DOM-2级事件处理程序"><a href="#DOM-2级事件处理程序" class="headerlink" title="DOM 2级事件处理程序"></a>DOM 2级事件处理程序</h2><p>我先说DOM 2级方法，是因为目前基本上都是用它来添加或移除事件处理程序。其实就定义了两个方法<strong>addEventListener()和removeEventListener()</strong>。每个DOM节点都有这两个方法，接受三个参数（事件名称，事件处理程序函数，布尔值false）。最后一个参数推荐false表示在冒泡阶段调用事件处理程序（为了兼容浏览器，大多数情况，事件处理程序会被添加到事件流的冒泡阶段）。还是之前的例子，这里只展示用DOM 2级方法来添加、移除事件处理程序。</p>
+<pre><code>var btn = document.getElementById(&apos;myBtn&apos;);
+var handler1 = function() {
+  console.log(&apos;Clicked 1.&apos;);
+};
+var handler2 = function() {
+  console.log(&apos;Clicked 2.&apos;);
+};
+// 参数：事件名称，事件处理程序函数，false表示冒泡阶段执行函数
+btn.addEventListener(&apos;click&apos;, handler1, false);
+btn.addEventListener(&apos;click&apos;, handler2, false);
+</code></pre><p>以上代码为button元素的‘click’事件添加了事件处理程序，该事件在冒泡阶段触发。并且DOM 2级方法有一个明显的好处，就是<strong>可以在一个事件上添加多个事件处理程序</strong>，并且在执行时会按照添加的顺序执行。上面的例子，依次添加了事件处理程序handler1和hendler2，因此在点击button元素后会依次打印‘Clicked 1.’，‘Clicked 2.’。</p>
+<p>使用DOM 2级方法addEventListener()添加的事件处理程序，也必须用DOM 2级方法removeEventListener()来移除。并且传入的参数必须一致，所以添加的时候，<strong>传入了一个匿名函数，该事件处理程序将无法被移除</strong>。因此不要使用匿名函数，可以使用函数定义或函数表达式来显式把函数名来传参，这样在移除的时候就知道是哪一个函数被添加进来了。比如需要移除上面例子的第一个事件处理程序。</p>
+<pre><code>btn.removeEventListener(&apos;click&apos;, handler1, false);
+</code></pre><p>添加上面代码后，再次点击button元素，只有第二个事件处理程序会被执行，只会打印‘Clicked 2.’，说明第一个事件处理程序成功被移除。</p>
+<blockquote>
+<p>总结：1.两个方法addEventListener()和removeEventListener()； 2.一个事件支持多个事件处理程序； 3.添加和移除的事件处理程序必须是一样的，显式传入函数名。</p>
+</blockquote>
+<h2 id="IE事件处理程序"><a href="#IE事件处理程序" class="headerlink" title="IE事件处理程序"></a>IE事件处理程序</h2><p>不想写，没有什么意思，目前该方法会在IE浏览器8以下（包括8）才会被使用。它和DOM 2级方法类似，也定义了两个方法attachEvent()和detachEvent()（起的什么名字）。这两个方法和DOM 2级的两个方法功能是一样的，不过它只有两个参数，因为事件冒泡是IE提出的，所以在IE8之前，IE只支持事件冒泡，也就不存在捕获阶段。以下代码需要在IE浏览器8之前版本（包括8）上运行：</p>
+<pre><code>var btn = document.getElementById(&apos;myBtn&apos;);
+var handler1 = function() {
+  console.log(&apos;Clicked 1.&apos;);
+};
+var handler2 = function() {
+  console.log(&apos;Clicked 2.&apos;);
+};
+
+btn.attachEvent(&apos;onclick&apos;, handler1);
+btn.attachEvent(&apos;onclick&apos;, handler2);
+</code></pre><p>以上代码同样是为button元素的‘click’事件添加事件处理程序，同样一个事件支持多个事件处理程序，奇葩的是，执行的顺序不是按照添加的顺序，而刚刚相反。点击button元素，先打印‘Clicked 2.’，再打印‘Clicked 1.’。这一现象需要在IE浏览器8之前看到，之后改过来了（亲测）。原来的真不知道是怎么想的，IE的东西就是这样奇葩，当然还有更奇葩的地方，默认情况下事件处理程序会在元素的作用域里执行，即this指向事件触发的元素，IE里事件处理程序是在全局作用域里执行，this指向window，这不是反逻辑吗？看下面的例子：</p>
+<pre><code>var btn = document.getElementById(&apos;myBtn&apos;);
+var handler = function() {
+  console.log(this === window);
+};
+btn.attachEvent(&apos;onclick&apos;, handler);
+</code></pre><p>点击button元素，打印的是‘true’，说明在事件处理程序里this指向的是window。</p>
+<blockquote>
+<p>总结：1.两个方法attachEvent()和detachEvent()，只在冒泡阶段执行；2. 一个事件支持多个事件处理程序，奇葩的是顺序和添加的顺序相反；3.添加和移除的事件处理程序函数是一样的，和DOM 2级方法一致；4. 最后就是IE的事件处理程序的作用域是全局作用域，this指向window。</p>
+</blockquote>
+<h2 id="DOM-0级事件处理程序"><a href="#DOM-0级事件处理程序" class="headerlink" title="DOM 0级事件处理程序"></a>DOM 0级事件处理程序</h2><p>只支持DOM 0级方法的浏览器没有多少了，也没什么可以说的。添加事件处理程序就是给把一个函数赋值给一个事件处理程序属性，移除的话就是属性值设为null。另外一点就是DOM 0级方法的每个事件只支持一个事件处理程序。也写一个例子：</p>
+<pre><code>var btn = document.getElementById(&apos;myBtn&apos;);
+btn.onclick = function() {
+  console.log(&apos;My id is &apos;+this.id);
+};
+</code></pre><p>不像前面两种方式，有专门的方法来添加和移除事件处理程序，这里是直接给事件处理程序属性赋值一个函数，代表添加了一个事件处理程序。结果是打印‘My id is myBtn’，从语法上感觉事件处理程序就是元素的一个方法，因此事件处理程序是在元素的作用域里运行，this指向触发事件的当前元素。移除事件处理程序只要给属性值设为null。</p>
+<pre><code>btn.onclick = null;
+</code></pre><blockquote>
+<p>总结：1.事件处理程序作为元素的方法，赋给事件处理程序属性；2.时间处理程序在元素的作用域里运行，this指向当前元素； 3.一个事件只支持一个事件处理程序。</p>
+</blockquote>
+<h2 id="HTML事件处理程序"><a href="#HTML事件处理程序" class="headerlink" title="HTML事件处理程序"></a>HTML事件处理程序</h2><p>不写了，这才是没有什么好写的，写一个例子结束。</p>
+<pre><code>&lt;button id=&quot;myBtn&quot; onclick=&quot;console.log(&apos;click!&apos;);&quot;&gt;Click&lt;/button&gt;
+</code></pre><p>这种方式问题多多：时差问题和作用域问题，还有就是HMTL代码和JS代码紧密耦合，这可是设计上的大忌。</p>
+<p>第一稿写于2017.10.1</p>
+<hr>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/10/01/JS-Event/" data-id="cj8850s27000211jx15ia4rof" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-ES6-class" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/09/30/ES6-class/" class="article-date">
+  <time datetime="2017-09-30T14:21:11.000Z" itemprop="datePublished">2017-09-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/30/ES6-class/">ES6-class</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="ES6带来了类"><a href="#ES6带来了类" class="headerlink" title="ES6带来了类"></a>ES6带来了类</h1><h2 id="类的使用"><a href="#类的使用" class="headerlink" title="类的使用"></a>类的使用</h2><p>JavaScript本身就是面向对象的，只是相比于传统的面向对象语言，它的面向对象总是让人感到比较困惑，最主要的原因就是虽然是面向对象，但是没有<strong>类</strong>。看下面一个例子，传统方法创建一个对象实例，需要借助构造函数和原型对象。</p>
+<pre><code>function Point(x, y) {
+    this.x = x;
+    this.y = y;
+}
+Point.prototype.toString = function() {
+    return &apos;(&apos; + this.x + &apos;,&apos; + this.y + &apos;)&apos;;
+};
+var p = new Point(1,2);
+console.log(p);                // Point {x: 1, y: 2}
+console.log(p.toString());     // (1,2)
+</code></pre><p>再次感谢ES6为我们带来了类，让我们可以像传统面向对象语言那样定义类class。这一次我们使用类class重新改写上面的例子。</p>
+<pre><code>class Point {
+    // 构造方法
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+    toString() {
+        return &apos;(&apos; + this.x + &apos;,&apos; + this.y + &apos;)&apos;;
+    }
+}
+var p = new Point(1,2);
+console.log(p);                // Point {x: 1, y: 2}
+console.log(p.toString());     // (1,2)
+</code></pre><p>比较上面两个例子，引入类之后，明显更加符合面向对象编程的语法，但实际在实现上并没有多大改变。先解释一下构造方法constructor()，和其他面向对象编程语言的功能是一样，在实例化对象时候自动执行，其中this指向实例对象。</p>
+<h2 id="类是函数"><a href="#类是函数" class="headerlink" title="类是函数"></a>类是函数</h2><p>ES6的类和构造函数没有什么本质的区别，就是改写了一下，让它变得更像我们所熟悉的传统面向对象编程中的类。我们知道JavaScript的数据类型（5种基本数据类型和一种引用数据类型），那么类属于哪一种数据类型，我们使用typeof操作符来看一下：</p>
+<pre><code>class Person {}
+var p = new Person();
+console.log(typeof Person);   // function
+console.log(Person === Person.prototype.constructor);  // true
+console.log(p.constructor === Person.prototype.constructor);  // true
+</code></pre><p>很明显，类的数据类型是function，说明它和构造函数没有什么区别，第二行说明类本身指向了它的原型对象的constructor(构造函数)属性，这也是构造函数的性质，所以类不过就是把构造函数重新改写了一遍，让人更容易理解。使用类来创建对象实例也是使用new，和构造函数的用法完全一致。</p>
+<p>现在，有一点已经明白了，类并没有带来什么新的东西，<strong>类不过是对构造函数的改写</strong>，在类里面写的方法，其实都定义在它的原型对象的属性上去了。另外对象实例的constructor方法就是类的原型对象的constructor方法，这又和构造函数创建对象实例是一致的。</p>
+<blockquote>
+<p>类和模块的内部，默认都是严格模式，不需要使用‘use strict’来指定。</p>
+</blockquote>
+<h2 id="类的constructor方法"><a href="#类的constructor方法" class="headerlink" title="类的constructor方法"></a>类的constructor方法</h2><p><strong>constructor方法</strong>是类的默认方法，通过new命令生成对象实例时，自动调用该方法。之前也说过了，该方法和传统面向对象编程语言里的用法是一样的，生成对象实例时自动调用。如果没有定义的话，会默认添加一个空的constructor方法。</p>
+<p>constructor方法默认返回实例对象（即this），完全可以指定返回另外一个对象（谁不正常会这样做），所以在constructor方法一般就不要写return了，让它默认返回实例对象好了。比如下面这样：</p>
+<pre><code>class Person {
+    constructor() {}
+}
+var p = new Person();
+console.log(p instanceof Person);     // true
+</code></pre><h2 id="类的对象实例"><a href="#类的对象实例" class="headerlink" title="类的对象实例"></a>类的对象实例</h2><ol>
+<li><p><strong>生成类的对象实例，必须要用new</strong>，这和构造函数生成对象实例是一样的，new绑定了this到对象实例。</p>
+</li>
+<li><p>实例的属性除非显式定义在其本身（this对象），否则都是定义在原型上（class上）。对象实例的属分为实例属性和原型属性。第一个例子，写在构造函数里，直接定义在this对象上的就是实例属性 <em>this.x = x;</em> ，写在原型对象上的属性 <em>Point.prototype.toString</em> 就是原型属性（所有对象实例共享）。</p>
+</li>
+<li><p>类的所有对象实例共享一个原型对象，不解释了。</p>
+</li>
+</ol>
+<h2 id="类class表达式"><a href="#类class表达式" class="headerlink" title="类class表达式"></a>类class表达式</h2><p>类的数据类型是函数，函数有的类肯定也有，所以类可以用表达式来定义也没有什么奇怪的。写到这里越来越觉得，类就是把函数的function换成了class，当然还有一些小小的改动。</p>
+<p>函数表达式在JavaScript是一个很重要的概念，这里不具体解释，看一个例子：</p>
+<pre><code>var myFunc = function() {
+    console.log(&apos;I am function.&apos;);
+};
+myFunc();       // I am function.
+</code></pre><p>类比函数表达式，可以写类表达式：</p>
+<pre><code>var myClass = class {
+    sayHi() {
+        console.log(&apos;I am function.&apos;);
+    }
+};
+var ins = new myClass();
+ins.sayHi();   // I am function.
+</code></pre><p>同样还有立即执行函数，自然也有立即执行类，生成一个对象实例，看下面这个例子：</p>
+<pre><code>var person = new class Person {
+    constructor(name) {
+        this.name = name;
+    }
+    sayHi() {
+        console.log(&apos;Hi, I am &apos; + this.name);
+    }
+}(&apos;Tom&apos;);
+person.sayHi();     // Hi, I am Tom
+</code></pre><p>也没什么解释的，定义类的时候直接new生成一个对象实例。</p>
+<h2 id="类不存在变量提升"><a href="#类不存在变量提升" class="headerlink" title="类不存在变量提升"></a>类不存在变量提升</h2><p>一句话<strong>先定义，后使用</strong>。</p>
+<h2 id="私有属性和方法"><a href="#私有属性和方法" class="headerlink" title="私有属性和方法"></a>私有属性和方法</h2><p>ES6暂不支持，提案为属性加前缀‘#’表示为私有属性，貌似还不能使用现在，暂时pass。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/09/30/ES6-class/" data-id="cj8850s1t000011jxqun4sddz" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-ES6-let-const" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/09/29/ES6-let-const/" class="article-date">
@@ -83,11 +338,78 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="let-和-const-命令"><a href="#let-和-const-命令" class="headerlink" title="let 和 const 命令"></a>let 和 const 命令</h1>
+        <h1 id="ES6学习笔记1：let-和-const-命令"><a href="#ES6学习笔记1：let-和-const-命令" class="headerlink" title="ES6学习笔记1：let 和 const 命令"></a>ES6学习笔记1：let 和 const 命令</h1><p>这是关于ES6第一个笔记，很开心可以开始这个系列（ES6系列）。正式接触ES6是在学习React时，第一次看到箭头函数，感觉很神奇，之后很少再去写function关键字。当然，ES6神奇的地方远远不止这些。就先从JS变量开始吧。</p>
+<h1 id="let-命令"><a href="#let-命令" class="headerlink" title="let 命令"></a>let 命令</h1><h3 id="let用法和示例"><a href="#let用法和示例" class="headerlink" title="let用法和示例"></a>let用法和示例</h3><blockquote>
+<p>红宝书明确指出：JS没有<strong>块级作用域</strong>。JS中语句中的变量声明会将变量添加到当前的执行环境中。在for循环中可以很明显地看到JS是没有作用域的。</p>
+</blockquote>
+<pre><code>for(var i=0; i&lt;10; i++) {
+    console.log(i);
+}
+console.log(i);  // 10
+</code></pre><p>对于有块级作用域的语言（C，JAVA），在for语句初始化变量的表达式所定义的变量（上面例子的i），只会存在循环体里，循环结束变量就被释放了。之前说了，JS没有块级作用域，for语句创建的i变量被添加到当前的执行环境（这里是全局执行环境），因此在循环结束后仍然可以访问到变量i的值。</p>
+<p>ES6补充了这一块内容，使用<strong>let</strong>来增加块级作用域。let声明的变量只在它所在的代码块有效，同样是上面的一个例子，换成let后的结果就是变量i未定义。</p>
+<pre><code>for(let i=0; i&lt;10; i++) {
+    console.log(i);
+}
+console.log(i); // Uncaught ReferenceError: i is not defined
+</code></pre><p>这是一个非常好的改进，块级作用域的好处是很大的，还是for循环的例子，循环变量i在循环结束就应该被释放掉，以免与后面的其他变量混淆。所以在确定一个变量的作用域的情况下，多使用let来声明变量。</p>
+<p>猜猜看下面两段代码的结果：</p>
+<pre><code>var a = [];
+for(var i=0; i&lt;10; i++) {
+    a[i] = function() {
+        console.log(i);
+    }
+}
+a[6]();
+
+var a = [];
+for(let i=0; i&lt;10; i++) {
+    a[i] = function() {
+        console.log(i);
+    }
+}
+a[6]();
+</code></pre><p>上面两段代码，只有一处不一样，for语句的循环变量i一个是用var声明，一个是用let声明。结果就是第一段是10，第二段是6，猜对了吗？</p>
+<p>第一段代码是一个闭包，不知道有没有看出来，数组a的每一个函数都是一个闭包，它们使用的i变量都是同一个，就是全局的i变量，循环结束，i的变量的值是10，自然调用每个函数时，使用的i变量的值就是10，这个不难，用闭包就可以解释。</p>
+<p>第二段代码首先也是闭包，不过变量i使用let声明，导致i只在一次循环内有效，所以每一次循环的i都是一个新的变量。这句话很关键，可以这样说，第五次循环里的i和第六次循环的i是两个变量，一个存的是5，一个存的是6，因此最后结果是6。感觉是不是找到一个新的方法来消除闭包的影响。</p>
+<h3 id="不存在变量提升"><a href="#不存在变量提升" class="headerlink" title="不存在变量提升"></a>不存在变量提升</h3><p>JS里有很多神奇的地方，比如变量提升，可以在变量声明之前使用它。</p>
+<pre><code>console.log(foo); // undefined
+var foo = 1;
+</code></pre><p>这可不是什么好事情，显得很奇怪，也不严谨，ES6正在严格要求我们写代码的规范，不要去做奇奇怪怪的事情，不符合规范的就让它报错吧。换了let就会出错，因为它不让做这样不好的事情。</p>
+<pre><code>console.log(foo);  // Uncaught ReferenceError: foo is not defined
+let foo = 1;
+</code></pre><h3 id="暂时性死区"><a href="#暂时性死区" class="headerlink" title="暂时性死区"></a>暂时性死区</h3><p>这次不讨论了…以后再补充。</p>
+<h2 id="块级作用域"><a href="#块级作用域" class="headerlink" title="块级作用域"></a>块级作用域</h2><p>之前说了JS没有块级作用域，那么它有什么呢？只有全局作用域和函数作用域。看一个没有块级作用域下因为变量提升做的坏事：</p>
+<pre><code>var tmp = new Date();
+function f() {
+    console.log(tmp);
+    if(false) {
+        var tmp = &apos;test&apos;;
+    }
+}
+f();   // undefined
+</code></pre><p>由于没有块级作用域，if语句里的定义tmp存在于函数f的作用域里，又由于变量提升，导致tmp的值为undefined，因为if语句里面和外面的tmp变量是同一个。原来的目的是if语句外的tmp变量用的函数外的tmp，if语句里声明的tmp变量是独立的。现在在if语句里用let声明试试看：</p>
+<pre><code>var tmp = new Date();
+function f() {
+    console.log(tmp);
+    if(false) {
+        let tmp = &apos;test&apos;;
+    }
+}
+f();   // Fri Sep 29 2017 11:00:57 GMT+0800
+</code></pre><p>现在没有问题了，使用了let来声明tmp变量，它的作用域只局限于if语句里，不会影响到if语句外的tmp变量，它们不是同一个变量。</p>
+<p>let实际上为JS新增了块级作用域。这是个非常好的改进，也取代了广泛应用的立即执行函数表达式（假装是一个块级作用域）。</p>
+<h1 id="const-命令"><a href="#const-命令" class="headerlink" title="const 命令"></a>const 命令</h1><p>const声明一个只读的常量。一旦声明，常量的值就不能改变。改变一个常量肯定会报错。</p>
+<ol>
+<li>const的作用域与let命令相同：只在声明所在的块级作用域内有效。</li>
+<li>const命令声明的常量也是不提升，同样存在暂时性死区，只能在声明的位置后面使用。</li>
+<li>const声明的常量，也与let一样不可重复声明。</li>
+</ol>
+
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/09/29/ES6-let-const/" data-id="cj857iynk00002zjx5hk8487u" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/09/29/ES6-let-const/" data-id="cj8850s23000111jx09cg7p4m" class="article-share-link">Share</a>
       
       
     </footer>
@@ -123,7 +445,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/09/28/Test-Hexo/" data-id="cj857iyns00012zjxsxb0t03s" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/09/28/Test-Hexo/" data-id="cj8850s29000311jxqmd3pm9n" class="article-share-link">Share</a>
       
       
     </footer>
@@ -168,7 +490,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/09/28/hello-world/" data-id="cj857iynw00022zjx4txc3wh9" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/09/28/hello-world/" data-id="cj8850s2b000411jxad9l26eh" class="article-share-link">Share</a>
       
       
     </footer>
@@ -195,7 +517,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li></ul>
     </div>
   </div>
 
@@ -206,6 +528,14 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/10/01/JS-Event/">JS-Event</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/30/ES6-class/">ES6-class</a>
+          </li>
         
           <li>
             <a href="/2017/09/29/ES6-let-const/">ES6-let&amp;const</a>

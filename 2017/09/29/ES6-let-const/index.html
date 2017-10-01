@@ -5,16 +5,16 @@
   
   <title>ES6-let&amp;const | 净无涯的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="let 和 const 命令">
+  <meta name="description" content="ES6学习笔记1：let 和 const 命令这是关于ES6第一个笔记，很开心可以开始这个系列（ES6系列）。正式接触ES6是在学习React时，第一次看到箭头函数，感觉很神奇，之后很少再去写function关键字。当然，ES6神奇的地方远远不止这些。就先从JS变量开始吧。 let 命令let用法和示例 红宝书明确指出：JS没有块级作用域。JS中语句中的变量声明会将变量添加到当前的执行环境中。在f">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ES6-let&amp;const">
 <meta property="og:url" content="http://yoursite.com/2017/09/29/ES6-let-const/index.html">
 <meta property="og:site_name" content="净无涯的博客">
-<meta property="og:description" content="let 和 const 命令">
-<meta property="og:updated_time" content="2017-09-29T01:25:18.000Z">
+<meta property="og:description" content="ES6学习笔记1：let 和 const 命令这是关于ES6第一个笔记，很开心可以开始这个系列（ES6系列）。正式接触ES6是在学习React时，第一次看到箭头函数，感觉很神奇，之后很少再去写function关键字。当然，ES6神奇的地方远远不止这些。就先从JS变量开始吧。 let 命令let用法和示例 红宝书明确指出：JS没有块级作用域。JS中语句中的变量声明会将变量添加到当前的执行环境中。在f">
+<meta property="og:updated_time" content="2017-09-29T03:24:09.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ES6-let&amp;const">
-<meta name="twitter:description" content="let 和 const 命令">
+<meta name="twitter:description" content="ES6学习笔记1：let 和 const 命令这是关于ES6第一个笔记，很开心可以开始这个系列（ES6系列）。正式接触ES6是在学习React时，第一次看到箭头函数，感觉很神奇，之后很少再去写function关键字。当然，ES6神奇的地方远远不止这些。就先从JS变量开始吧。 let 命令let用法和示例 红宝书明确指出：JS没有块级作用域。JS中语句中的变量声明会将变量添加到当前的执行环境中。在f">
   
     <link rel="alternate" href="/atom.xml" title="净无涯的博客" type="application/atom+xml">
   
@@ -85,11 +85,78 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="let-和-const-命令"><a href="#let-和-const-命令" class="headerlink" title="let 和 const 命令"></a>let 和 const 命令</h1>
+        <h1 id="ES6学习笔记1：let-和-const-命令"><a href="#ES6学习笔记1：let-和-const-命令" class="headerlink" title="ES6学习笔记1：let 和 const 命令"></a>ES6学习笔记1：let 和 const 命令</h1><p>这是关于ES6第一个笔记，很开心可以开始这个系列（ES6系列）。正式接触ES6是在学习React时，第一次看到箭头函数，感觉很神奇，之后很少再去写function关键字。当然，ES6神奇的地方远远不止这些。就先从JS变量开始吧。</p>
+<h1 id="let-命令"><a href="#let-命令" class="headerlink" title="let 命令"></a>let 命令</h1><h3 id="let用法和示例"><a href="#let用法和示例" class="headerlink" title="let用法和示例"></a>let用法和示例</h3><blockquote>
+<p>红宝书明确指出：JS没有<strong>块级作用域</strong>。JS中语句中的变量声明会将变量添加到当前的执行环境中。在for循环中可以很明显地看到JS是没有作用域的。</p>
+</blockquote>
+<pre><code>for(var i=0; i&lt;10; i++) {
+    console.log(i);
+}
+console.log(i);  // 10
+</code></pre><p>对于有块级作用域的语言（C，JAVA），在for语句初始化变量的表达式所定义的变量（上面例子的i），只会存在循环体里，循环结束变量就被释放了。之前说了，JS没有块级作用域，for语句创建的i变量被添加到当前的执行环境（这里是全局执行环境），因此在循环结束后仍然可以访问到变量i的值。</p>
+<p>ES6补充了这一块内容，使用<strong>let</strong>来增加块级作用域。let声明的变量只在它所在的代码块有效，同样是上面的一个例子，换成let后的结果就是变量i未定义。</p>
+<pre><code>for(let i=0; i&lt;10; i++) {
+    console.log(i);
+}
+console.log(i); // Uncaught ReferenceError: i is not defined
+</code></pre><p>这是一个非常好的改进，块级作用域的好处是很大的，还是for循环的例子，循环变量i在循环结束就应该被释放掉，以免与后面的其他变量混淆。所以在确定一个变量的作用域的情况下，多使用let来声明变量。</p>
+<p>猜猜看下面两段代码的结果：</p>
+<pre><code>var a = [];
+for(var i=0; i&lt;10; i++) {
+    a[i] = function() {
+        console.log(i);
+    }
+}
+a[6]();
+
+var a = [];
+for(let i=0; i&lt;10; i++) {
+    a[i] = function() {
+        console.log(i);
+    }
+}
+a[6]();
+</code></pre><p>上面两段代码，只有一处不一样，for语句的循环变量i一个是用var声明，一个是用let声明。结果就是第一段是10，第二段是6，猜对了吗？</p>
+<p>第一段代码是一个闭包，不知道有没有看出来，数组a的每一个函数都是一个闭包，它们使用的i变量都是同一个，就是全局的i变量，循环结束，i的变量的值是10，自然调用每个函数时，使用的i变量的值就是10，这个不难，用闭包就可以解释。</p>
+<p>第二段代码首先也是闭包，不过变量i使用let声明，导致i只在一次循环内有效，所以每一次循环的i都是一个新的变量。这句话很关键，可以这样说，第五次循环里的i和第六次循环的i是两个变量，一个存的是5，一个存的是6，因此最后结果是6。感觉是不是找到一个新的方法来消除闭包的影响。</p>
+<h3 id="不存在变量提升"><a href="#不存在变量提升" class="headerlink" title="不存在变量提升"></a>不存在变量提升</h3><p>JS里有很多神奇的地方，比如变量提升，可以在变量声明之前使用它。</p>
+<pre><code>console.log(foo); // undefined
+var foo = 1;
+</code></pre><p>这可不是什么好事情，显得很奇怪，也不严谨，ES6正在严格要求我们写代码的规范，不要去做奇奇怪怪的事情，不符合规范的就让它报错吧。换了let就会出错，因为它不让做这样不好的事情。</p>
+<pre><code>console.log(foo);  // Uncaught ReferenceError: foo is not defined
+let foo = 1;
+</code></pre><h3 id="暂时性死区"><a href="#暂时性死区" class="headerlink" title="暂时性死区"></a>暂时性死区</h3><p>这次不讨论了…以后再补充。</p>
+<h2 id="块级作用域"><a href="#块级作用域" class="headerlink" title="块级作用域"></a>块级作用域</h2><p>之前说了JS没有块级作用域，那么它有什么呢？只有全局作用域和函数作用域。看一个没有块级作用域下因为变量提升做的坏事：</p>
+<pre><code>var tmp = new Date();
+function f() {
+    console.log(tmp);
+    if(false) {
+        var tmp = &apos;test&apos;;
+    }
+}
+f();   // undefined
+</code></pre><p>由于没有块级作用域，if语句里的定义tmp存在于函数f的作用域里，又由于变量提升，导致tmp的值为undefined，因为if语句里面和外面的tmp变量是同一个。原来的目的是if语句外的tmp变量用的函数外的tmp，if语句里声明的tmp变量是独立的。现在在if语句里用let声明试试看：</p>
+<pre><code>var tmp = new Date();
+function f() {
+    console.log(tmp);
+    if(false) {
+        let tmp = &apos;test&apos;;
+    }
+}
+f();   // Fri Sep 29 2017 11:00:57 GMT+0800
+</code></pre><p>现在没有问题了，使用了let来声明tmp变量，它的作用域只局限于if语句里，不会影响到if语句外的tmp变量，它们不是同一个变量。</p>
+<p>let实际上为JS新增了块级作用域。这是个非常好的改进，也取代了广泛应用的立即执行函数表达式（假装是一个块级作用域）。</p>
+<h1 id="const-命令"><a href="#const-命令" class="headerlink" title="const 命令"></a>const 命令</h1><p>const声明一个只读的常量。一旦声明，常量的值就不能改变。改变一个常量肯定会报错。</p>
+<ol>
+<li>const的作用域与let命令相同：只在声明所在的块级作用域内有效。</li>
+<li>const命令声明的常量也是不提升，同样存在暂时性死区，只能在声明的位置后面使用。</li>
+<li>const声明的常量，也与let一样不可重复声明。</li>
+</ol>
+
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/09/29/ES6-let-const/" data-id="cj857iynk00002zjx5hk8487u" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/09/29/ES6-let-const/" data-id="cj8850s23000111jx09cg7p4m" class="article-share-link">Share</a>
       
       
     </footer>
@@ -97,6 +164,15 @@
   
     
 <nav id="article-nav">
+  
+    <a href="/2017/09/30/ES6-class/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          ES6-class
+        
+      </div>
+    </a>
   
   
     <a href="/2017/09/28/Test-Hexo/" id="article-nav-older" class="article-nav-link-wrap">
@@ -125,7 +201,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li></ul>
     </div>
   </div>
 
@@ -136,6 +212,14 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/10/01/JS-Event/">JS-Event</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/30/ES6-class/">ES6-class</a>
+          </li>
         
           <li>
             <a href="/2017/09/29/ES6-let-const/">ES6-let&amp;const</a>
