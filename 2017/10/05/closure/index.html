@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>闭包，从作用域链说起 | 净无涯的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="曾经在CSDN上写过一篇文章《闭包，应该从作用域链说起》。那篇文章写得比较啰嗦，打算重新写一次，力求写得更明白更直接。 闭包是什么校招参加面试，基本上都会问问你是怎么理解闭包的，我的回答是闭包应该从作用域链上的角度来说，因为如果没有作用域链，就根本不会出现闭包。闭包引用了包含函数的活动对象，因此它可以访问包含函数的变量。所以我打算从作用域开始写起。 执行环境和变量对象JavaScript 经常会提">
+<meta property="og:type" content="article">
+<meta property="og:title" content="闭包，从作用域链说起">
+<meta property="og:url" content="http://yoursite.com/2017/10/05/closure/index.html">
+<meta property="og:site_name" content="净无涯的博客">
+<meta property="og:description" content="曾经在CSDN上写过一篇文章《闭包，应该从作用域链说起》。那篇文章写得比较啰嗦，打算重新写一次，力求写得更明白更直接。 闭包是什么校招参加面试，基本上都会问问你是怎么理解闭包的，我的回答是闭包应该从作用域链上的角度来说，因为如果没有作用域链，就根本不会出现闭包。闭包引用了包含函数的活动对象，因此它可以访问包含函数的变量。所以我打算从作用域开始写起。 执行环境和变量对象JavaScript 经常会提">
+<meta property="og:updated_time" content="2017-10-05T09:17:24.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="闭包，从作用域链说起">
+<meta name="twitter:description" content="曾经在CSDN上写过一篇文章《闭包，应该从作用域链说起》。那篇文章写得比较啰嗦，打算重新写一次，力求写得更明白更直接。 闭包是什么校招参加面试，基本上都会问问你是怎么理解闭包的，我的回答是闭包应该从作用域链上的角度来说，因为如果没有作用域链，就根本不会出现闭包。闭包引用了包含函数的活动对象，因此它可以访问包含函数的变量。所以我打算从作用域开始写起。 执行环境和变量对象JavaScript 经常会提">
+  
+    <link rel="alternate" href="/atom.xml" title="净无涯的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">净无涯的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-closure" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/05/closure/" class="article-date">
+  <time datetime="2017-10-05T08:17:54.000Z" itemprop="datePublished">2017-10-05</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      闭包，从作用域链说起
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>曾经在CSDN上写过一篇文章《闭包，应该从作用域链说起》。那篇文章写得比较啰嗦，打算重新写一次，力求写得更明白更直接。</p>
+<h2 id="闭包是什么"><a href="#闭包是什么" class="headerlink" title="闭包是什么"></a>闭包是什么</h2><p>校招参加面试，基本上都会问问你是怎么理解闭包的，我的回答是闭包应该从作用域链上的角度来说，因为如果没有作用域链，就根本不会出现闭包。闭包引用了包含函数的活动对象，因此它可以访问包含函数的变量。所以我打算从作用域开始写起。</p>
+<h2 id="执行环境和变量对象"><a href="#执行环境和变量对象" class="headerlink" title="执行环境和变量对象"></a>执行环境和变量对象</h2><p>JavaScript 经常会提起<strong>执行环境</strong>（后面简称环境），毫不夸张这个概念应该是JavaScript 中最重要的了。</p>
+<blockquote>
+<p><strong>环境</strong>定义了变量或函数有权访问的其他数据，决定了它们各自的行为。每个环境都有一个关联的<strong>变量对象</strong>，环境中定义的所有变量和函数都保存在这个对象中。</p>
+</blockquote>
+<p>我们现在开始从JavaScript 的底层来解析我们的代码是怎么执行的，所以一开始的时候会慢慢来解释所有概念。从上面的解释来看，环境是什么？应该是可以访问的变量，环境和变量对象是对应的，能访问的变量和函数都存在这个变量对象中。这样解释也很难理解，用一个简单的例子来说明：window对象都应该比较熟悉，所有的全局变量和函数都是作为window对象的属性和方法，看下面的例子:</p>
+<pre><code>var tmp =&apos;hello&apos;;
+function myFunc() {
+  console.log(&apos;hello&apos;);
+}
+console.log(tmp === window.tmp);        // true
+console.log(myFunc === window.myFunc);  // true
+</code></pre><p>window对象就被认为是一个全局环境（最外围的一个环境），按照定义来说全局环境和window对象关联，<strong>在全局环境中定义的变量和函数都保存在window对象中</strong>。这一步应该可以理解，再重复一遍，全局环境的变量对象就是window对象，全局环境中的变量和函数都保存在window对象中，第一步就理解到这里。</p>
+<p>第二步我们说说环境的特点：<strong>某个环境的代码执行完毕后，该环境就会被销毁，保存在其中的所有变量和函数定义都会随之销毁</strong>。比如我们已经知道了全局环境，它什么时候销毁呢？当应用程序退出的时候（关闭网页或浏览器），这个全局环境就会被销毁，该环境中的变量和函数都不存在了，因为保存它们的window对象被销毁了。那么除了全局环境，还有什么环境？那就是函数环境了，其实也只有两种环境（全局环境和函数环境）。下一步再详细说明的就是函数的环境。</p>
+<blockquote>
+<p>每一个函数都有自己的环境，当执行流进入一个函数时，<strong>函数环境</strong>会被推入一个函数栈中。而在函数执行完成之后，栈会将其环境弹出，把控制权返回给之前的执行环境。</p>
+</blockquote>
+<p>相比于全局环境，函数环境才是我们最关心的。上面一段话也解释了JavaScript 是如何执行我们的代码的，依靠环境栈来控制执行流，到目前为止我们总结一下：<strong>环境和变量对象（全局环境和window对象，函数环境和变量对象），环境的特点，环境栈（JavaScript 执行流）</strong>。</p>
+<h2 id="作用域链"><a href="#作用域链" class="headerlink" title="作用域链"></a>作用域链</h2><p>在理解前面的环境和变量对象之后，就要面对这篇文章最核心的内容：作用域链。</p>
+<blockquote>
+<p>代码在环境中执行时，会为变量对象创建一个<strong>作用域链</strong>，它的作用是保证对环境有权访问的所有变量和函数的有序访问。作用域链的前端总是当前执行的代码所在环境的变量对象。</p>
+<p>如果是函数环境，变量对象则为“<strong>活动对象</strong>”，在最开始的时候只包含一个变量（arguments对象）。作用域链的下一个变量对象来自包含（外部）环境，而再下一个变量对象来自下一个外部环境，全局环境的变量对象（window对象）始终是作用域链中的最后一个变量对象。</p>
+</blockquote>
+<p>上面两段话，用最简洁的语言表达了作用域链，当然也很难理解。有几个关键的地方使我们需要注意的：</p>
+<ol>
+<li>作用域链是一条环境的变量对象的链，每一个值都是一个环境的变量对象。</li>
+<li>作用域链的作用是实现了有序访问，既然是链那就有方向，第一个是当前环境的变量对象，最后一个是全局环境的window对象。</li>
+<li>函数环境的变量对象叫做活动对象。</li>
+</ol>
+<p>下面这个例子我会一行一行代码地来分析：</p>
+<pre><code>function add(num1, num2) {
+  var sum = num1 + num2;
+  return sum;
+}
+
+var total = add(5, 10);
+console.log(total);
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/10/05/closure/" data-id="cj8eem5ae000638jxxk0e4xxz" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/10/05/garbage-collection/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">JavaScript 的垃圾收集</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/10/05/closure/">闭包，从作用域链说起</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/05/garbage-collection/">JavaScript 的垃圾收集</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/02/JS-array/">JavaScript 的数组汇总</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/JS-Event-performance/">事件的性能</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/JS-Event/">事件处理程序</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Mengxin Wu<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

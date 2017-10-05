@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>事件的性能 | 净无涯的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="性能是一个重要的话题，特别是在JavaScript语言中，JS是单线程执行任务的。如果性能不好的话，很容易引起用户感觉上的不适，页面加载很慢，点击没反应之类的问题。这里主要是从事件处理程序上来说明性能的问题。  事件处理程序是一个函数，JS里函数也是对象，需要占用内存，事件处理程序太多也就会导致占用的内存越多，性能也就越差，所以需要控制事件处理程序的数量。  事件处理程序需要添加在指定的元素上，而">
+<meta property="og:type" content="article">
+<meta property="og:title" content="事件的性能">
+<meta property="og:url" content="http://yoursite.com/2017/10/01/JS-Event-performance/index.html">
+<meta property="og:site_name" content="净无涯的博客">
+<meta property="og:description" content="性能是一个重要的话题，特别是在JavaScript语言中，JS是单线程执行任务的。如果性能不好的话，很容易引起用户感觉上的不适，页面加载很慢，点击没反应之类的问题。这里主要是从事件处理程序上来说明性能的问题。  事件处理程序是一个函数，JS里函数也是对象，需要占用内存，事件处理程序太多也就会导致占用的内存越多，性能也就越差，所以需要控制事件处理程序的数量。  事件处理程序需要添加在指定的元素上，而">
+<meta property="og:updated_time" content="2017-10-02T01:25:50.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="事件的性能">
+<meta name="twitter:description" content="性能是一个重要的话题，特别是在JavaScript语言中，JS是单线程执行任务的。如果性能不好的话，很容易引起用户感觉上的不适，页面加载很慢，点击没反应之类的问题。这里主要是从事件处理程序上来说明性能的问题。  事件处理程序是一个函数，JS里函数也是对象，需要占用内存，事件处理程序太多也就会导致占用的内存越多，性能也就越差，所以需要控制事件处理程序的数量。  事件处理程序需要添加在指定的元素上，而">
+  
+    <link rel="alternate" href="/atom.xml" title="净无涯的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">净无涯的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-JS-Event-performance" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/01/JS-Event-performance/" class="article-date">
+  <time datetime="2017-10-01T02:41:08.000Z" itemprop="datePublished">2017-10-01</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      事件的性能
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>性能是一个重要的话题，特别是在JavaScript语言中，JS是单线程执行任务的。如果性能不好的话，很容易引起用户感觉上的不适，页面加载很慢，点击没反应之类的问题。这里主要是从事件处理程序上来说明性能的问题。</p>
+<ol>
+<li><p>事件处理程序是一个函数，JS里函数也是对象，需要占用内存，事件处理程序太多也就会导致占用的内存越多，性能也就越差，所以需要控制事件处理程序的数量。</p>
+</li>
+<li><p>事件处理程序需要添加在指定的元素上，而DOM操作是非常耗时的，事件处理程序越多，DOM访问次数也越多，这样会影响页面的交互性能，会有迟钝的感觉。</p>
+</li>
+</ol>
+<h2 id="事件委托"><a href="#事件委托" class="headerlink" title="事件委托"></a>事件委托</h2><p>事件处理程序过多的问题，需要考虑<strong>事件委托</strong>。原理也很简单，利用了事件冒泡。一个事件处理程序可以管理某一类型的所有事件。以下面这个例子来说明：</p>
+<pre><code>&lt;ul id=&quot;links&quot;&gt;
+  &lt;li id=&quot;link1&quot;&gt;link1&lt;/li&gt;
+  &lt;li id=&quot;link2&quot;&gt;link2&lt;/li&gt;
+  &lt;li id=&quot;link3&quot;&gt;link3&lt;/li&gt;
+&lt;/ul&gt;
+</code></pre><p>3个li元素被点击后会执行相应的操作，传统的做法是给每一个li元素都添加事件处理程序，像下面这样：</p>
+<pre><code>var item1 = document.getElementById(&apos;link1&apos;);
+var item2 = document.getElementById(&apos;link2&apos;);
+var item3 = document.getElementById(&apos;link3&apos;);
+
+EventUtil.addHandler(item1, &apos;click&apos;, function(event){
+  console.log(&apos;Link 1.&apos;);
+});
+EventUtil.addHandler(item2, &apos;click&apos;, function(event){
+  console.log(&apos;Link 2&apos;);
+});
+EventUtil.addHandler(item3, &apos;click&apos;, function(event){
+  console.log(&apos;Link 3.&apos;);
+});
+</code></pre><p>上面代码使用了自己封装的跨浏览器的事件处理程序对象（在事件处理程序的那篇博客里有），这样添加的话，需要为每一个元素都添加，如果需要添加的元素很多的话，必然会有很多事件处理程序，占用内存越多性能越差。所以上面的例子完全可以使用事件委托，在DOM树上层次尽量高的地方添加一个就好了，这里就选ul元素。</p>
+<pre><code>var list = document.getElementById(&apos;links&apos;);
+EventUtil.addHandler(list, &apos;click&apos;, function(event) {
+  var target = event.target;
+  switch(target.id) {
+    case &apos;link1&apos;:
+      console.log(&apos;Link 1.&apos;);
+      break;
+    case &apos;link2&apos;:
+      console.log(&apos;Link 2.&apos;);
+      break;
+    case &apos;link3&apos;:
+      console.log(&apos;Link 3.&apos;);
+      break;
+    default:
+      break;
+  }
+});
+</code></pre><p>很明显使用了事件委托，只取得了一个DOM元素，只添加了一个事件处理程序，因为利用了事件冒泡的特性。适合事件委托的事件主要是鼠标（click，mousedown，mouseup）和键盘事件（keydown，keyup，keypress）。</p>
+<blockquote>
+<p>总结：事件委托将一类的事件处理程序减少为一个，利用了事件冒泡的特性，有效地提升了页面的性能。主要体现在两个方面：1.减少DOM的访问次数；2.减少事件处理程序的数量。</p>
+</blockquote>
+<h2 id="移除事件处理程序"><a href="#移除事件处理程序" class="headerlink" title="移除事件处理程序"></a>移除事件处理程序</h2><p>上面说了使用事件委托是从数量上来限制事件处理程序带来的性能影响。但如果事件处理程序不需要的话，不及时清除的话，内存里留有那些“空事件处理程序”， 也会造成内存和性能的问题。说简单点，就是不需要的时候及时移除事件处理程序。</p>
+<h3 id="第一种情况：-文档中移除带有事件处理程序的元素"><a href="#第一种情况：-文档中移除带有事件处理程序的元素" class="headerlink" title="第一种情况： 文档中移除带有事件处理程序的元素"></a>第一种情况： 文档中移除带有事件处理程序的元素</h3><p>这也很好理解，一开始有一个元素，给它添加了一个事件处理程序，然后在别的地方这个元素被移除了（可以是DOM操作，也可以是使用innerHTML直接替换），反正这个元素不再出现在页面上，自然添加在这个元素上的事件处理程序也不会再被执行，这样就变成了“空事件处理程序”。浏览器不会那么智能（最傻的IE），它可不知道这个事件处理程序已经变成了空事件，也就不会把它当做垃圾进行回收，因为事件处理程序程序和元素还保存着引用关系。（这里关于垃圾收集机制不具体解释，有一个方式是引用计数，只要一个对象还保存着引用关系就不会被当做垃圾回收）。既然浏览器不智能，那就我们手动来做这件事，手工移除事件处理程序，这样该事件处理程序的引用次数变成0，会被当做垃圾进行回收。下面的例子就解释了之前说的这么一大段话。</p>
+<pre><code>&lt;div id=&quot;myDiv&quot;&gt;
+  &lt;button id=&quot;myBtn&quot;&gt;Click&lt;/button&gt;
+&lt;/div&gt;
+
+var btn = document.getElementById(&apos;myBtn&apos;);
+    btn.onclick = function() {
+        document.getElementById(&apos;myDiv&apos;).innerHTML = &apos;change div.&apos;;
+    };
+</code></pre><p>上面的例子也很简单，单击button元素，整个div元素就变成了一段文字“change div.”，button元素被替换了，不再在页面上出现，但是事件处理程序和这个button元素还保存着引用关系，只要还存在着这样的引用关系，浏览器就不会把它们当做是垃圾进行回收，没有用了还放在内存里面，这不就是浪费了吗？所以在移除元素或者替换的时候，最好手动去移除事件处理程序（虽然有些浏览器现在比较聪明了，但是IE还是那么傻），针对上面的例子使用的是DOM 0级方法添加的，移除的话就是属性值设为null。</p>
+<pre><code>var btn = document.getElementById(&apos;myBtn&apos;);
+btn.onclick = function() {
+  // 明确某个元素会被移除，手动移除事件处理程序
+  btn.onclick = null;
+  document.getElementById(&apos;myDiv&apos;).innerHTML = &apos;change div.&apos;;
+};
+</code></pre><h2 id="第二种情况：页面卸载"><a href="#第二种情况：页面卸载" class="headerlink" title="第二种情况：页面卸载"></a>第二种情况：页面卸载</h2><p>很多浏览器（尤其是IE）在页面卸载的时候，如果没有把事件处理程序清除干净，那这些剩余的就会滞留在内存中。这样在下次装载或者刷新的时候，它们还存在在内存中，导致内存滞留的对象越来越多，就是因为事件处理程序占用的空间没有被释放。</p>
+<p>解决办法其实已经说了，<strong>在onunload事件（页面卸载事件）里面移除所有的事件处理程序</strong>。如果你使用了事件委托，那很庆幸，这里去移除事件处理程序会很简单，否则的话你要为每一个事件事件处理程序都要写相应的移除处理代码。简单的话，就是在onload事件里添加的内容，需要在onunload事件里相应地去移除。</p>
+<blockquote>
+<p>总结：移除事件处理程序，也会提升页面的性能。第一种情况：在知道元素被移除的时候需要手动去移除事件处理程序；第二种情况：在页面卸载的时候移除所有事件处理程序。</p>
+</blockquote>
+<p>第一稿于2017.10.2</p>
+<hr>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/10/01/JS-Event-performance/" data-id="cj8eem5a7000238jx2zjc2o9d" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/10/02/JS-array/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          JavaScript 的数组汇总
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/10/01/JS-Event/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">事件处理程序</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/10/05/closure/">闭包，从作用域链说起</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/05/garbage-collection/">JavaScript 的垃圾收集</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/02/JS-array/">JavaScript 的数组汇总</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/JS-Event-performance/">事件的性能</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/JS-Event/">事件处理程序</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Mengxin Wu<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

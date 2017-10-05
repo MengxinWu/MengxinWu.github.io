@@ -3,18 +3,18 @@
 <head>
   <meta charset="utf-8">
   
-  <title>JS-Event | 净无涯的博客</title>
+  <title>事件处理程序 | 净无涯的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="事件处理程序 HTML事件处理程序（没人用了）；  DOM 0级事件处理程序，每一个事件只支持一个事件处理程序；  IE事件处理程序（看见IE就烦）；  DOM 2级事件处理程序（默认使用）。   既然事件处理程序有这么多类型，自然考虑要封装一下，写一个跨浏览器的事件处理程序，以上三种方式（第一种不考虑）的优先级：先判断DOM 2级方法，再判断IE方法，最后是DOM 0级方法。 跨浏览器的事件处理">
+  <meta name="description" content="HTML事件处理程序（没人用了）；  DOM 0级事件处理程序，每一个事件只支持一个事件处理程序；  IE事件处理程序（看见IE就烦）；  DOM 2级事件处理程序（默认使用）。   既然事件处理程序有这么多类型，自然考虑要封装一下，写一个跨浏览器的事件处理程序，以上三种方式（第一种不考虑）的优先级：先判断DOM 2级方法，再判断IE方法，最后是DOM 0级方法。 跨浏览器的事件处理程序直接上代">
 <meta property="og:type" content="article">
-<meta property="og:title" content="JS-Event">
+<meta property="og:title" content="事件处理程序">
 <meta property="og:url" content="http://yoursite.com/2017/10/01/JS-Event/index.html">
 <meta property="og:site_name" content="净无涯的博客">
-<meta property="og:description" content="事件处理程序 HTML事件处理程序（没人用了）；  DOM 0级事件处理程序，每一个事件只支持一个事件处理程序；  IE事件处理程序（看见IE就烦）；  DOM 2级事件处理程序（默认使用）。   既然事件处理程序有这么多类型，自然考虑要封装一下，写一个跨浏览器的事件处理程序，以上三种方式（第一种不考虑）的优先级：先判断DOM 2级方法，再判断IE方法，最后是DOM 0级方法。 跨浏览器的事件处理">
-<meta property="og:updated_time" content="2017-10-01T02:36:50.000Z">
+<meta property="og:description" content="HTML事件处理程序（没人用了）；  DOM 0级事件处理程序，每一个事件只支持一个事件处理程序；  IE事件处理程序（看见IE就烦）；  DOM 2级事件处理程序（默认使用）。   既然事件处理程序有这么多类型，自然考虑要封装一下，写一个跨浏览器的事件处理程序，以上三种方式（第一种不考虑）的优先级：先判断DOM 2级方法，再判断IE方法，最后是DOM 0级方法。 跨浏览器的事件处理程序直接上代">
+<meta property="og:updated_time" content="2017-10-01T02:43:18.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="JS-Event">
-<meta name="twitter:description" content="事件处理程序 HTML事件处理程序（没人用了）；  DOM 0级事件处理程序，每一个事件只支持一个事件处理程序；  IE事件处理程序（看见IE就烦）；  DOM 2级事件处理程序（默认使用）。   既然事件处理程序有这么多类型，自然考虑要封装一下，写一个跨浏览器的事件处理程序，以上三种方式（第一种不考虑）的优先级：先判断DOM 2级方法，再判断IE方法，最后是DOM 0级方法。 跨浏览器的事件处理">
+<meta name="twitter:title" content="事件处理程序">
+<meta name="twitter:description" content="HTML事件处理程序（没人用了）；  DOM 0级事件处理程序，每一个事件只支持一个事件处理程序；  IE事件处理程序（看见IE就烦）；  DOM 2级事件处理程序（默认使用）。   既然事件处理程序有这么多类型，自然考虑要封装一下，写一个跨浏览器的事件处理程序，以上三种方式（第一种不考虑）的优先级：先判断DOM 2级方法，再判断IE方法，最后是DOM 0级方法。 跨浏览器的事件处理程序直接上代">
   
     <link rel="alternate" href="/atom.xml" title="净无涯的博客" type="application/atom+xml">
   
@@ -77,7 +77,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      JS-Event
+      事件处理程序
     </h1>
   
 
@@ -85,7 +85,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="事件处理程序"><a href="#事件处理程序" class="headerlink" title="事件处理程序"></a>事件处理程序</h1><ol>
+        <ol>
 <li><p>HTML事件处理程序（没人用了）；</p>
 </li>
 <li><p>DOM 0级事件处理程序，每一个事件只支持一个事件处理程序；</p>
@@ -193,7 +193,7 @@ btn.onclick = function() {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/01/JS-Event/" data-id="cj8850s27000211jx15ia4rof" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/01/JS-Event/" data-id="cj8eem5a9000338jx2a364ii4" class="article-share-link">Share</a>
       
       
     </footer>
@@ -201,6 +201,15 @@ btn.onclick = function() {
   
     
 <nav id="article-nav">
+  
+    <a href="/2017/10/01/JS-Event-performance/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          事件的性能
+        
+      </div>
+    </a>
   
   
     <a href="/2017/09/30/ES6-class/" id="article-nav-older" class="article-nav-link-wrap">
@@ -242,23 +251,23 @@ btn.onclick = function() {
       <ul>
         
           <li>
-            <a href="/2017/10/01/JS-Event/">JS-Event</a>
+            <a href="/2017/10/05/closure/">闭包，从作用域链说起</a>
           </li>
         
           <li>
-            <a href="/2017/09/30/ES6-class/">ES6-class</a>
+            <a href="/2017/10/05/garbage-collection/">JavaScript 的垃圾收集</a>
           </li>
         
           <li>
-            <a href="/2017/09/29/ES6-let-const/">ES6-let&amp;const</a>
+            <a href="/2017/10/02/JS-array/">JavaScript 的数组汇总</a>
           </li>
         
           <li>
-            <a href="/2017/09/28/Test-Hexo/">Test Hexo</a>
+            <a href="/2017/10/01/JS-Event-performance/">事件的性能</a>
           </li>
         
           <li>
-            <a href="/2017/09/28/hello-world/">Hello World</a>
+            <a href="/2017/10/01/JS-Event/">事件处理程序</a>
           </li>
         
       </ul>

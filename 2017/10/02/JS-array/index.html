@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>JavaScript 的数组汇总 | 净无涯的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="该文章会不断更新… 数组的操作方法数组的内容比较多，一次性也写不完，先写三个操作方法，concat()，slice()，splice()。前面两个方法有一些共性：1.返回一个新的数组；2.不会改变原数组。第三个方法是在原数组的基础上进行操作，会改变原来的数组。 concat方法，数组拼接，不改变原数组这个方法会先创建当前数组的一个副本（为了不影响原数组），然后将接受到的参数添加到这个副本的末尾，最">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JavaScript 的数组汇总">
+<meta property="og:url" content="http://yoursite.com/2017/10/02/JS-array/index.html">
+<meta property="og:site_name" content="净无涯的博客">
+<meta property="og:description" content="该文章会不断更新… 数组的操作方法数组的内容比较多，一次性也写不完，先写三个操作方法，concat()，slice()，splice()。前面两个方法有一些共性：1.返回一个新的数组；2.不会改变原数组。第三个方法是在原数组的基础上进行操作，会改变原来的数组。 concat方法，数组拼接，不改变原数组这个方法会先创建当前数组的一个副本（为了不影响原数组），然后将接受到的参数添加到这个副本的末尾，最">
+<meta property="og:updated_time" content="2017-10-02T02:27:28.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JavaScript 的数组汇总">
+<meta name="twitter:description" content="该文章会不断更新… 数组的操作方法数组的内容比较多，一次性也写不完，先写三个操作方法，concat()，slice()，splice()。前面两个方法有一些共性：1.返回一个新的数组；2.不会改变原数组。第三个方法是在原数组的基础上进行操作，会改变原来的数组。 concat方法，数组拼接，不改变原数组这个方法会先创建当前数组的一个副本（为了不影响原数组），然后将接受到的参数添加到这个副本的末尾，最">
+  
+    <link rel="alternate" href="/atom.xml" title="净无涯的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">净无涯的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-JS-array" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/02/JS-array/" class="article-date">
+  <time datetime="2017-10-02T01:40:54.000Z" itemprop="datePublished">2017-10-02</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      JavaScript 的数组汇总
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>该文章会不断更新…</p>
+<h2 id="数组的操作方法"><a href="#数组的操作方法" class="headerlink" title="数组的操作方法"></a>数组的操作方法</h2><p>数组的内容比较多，一次性也写不完，先写三个操作方法，concat()，slice()，splice()。前面两个方法有一些共性：<strong>1.返回一个新的数组；2.不会改变原数组</strong>。第三个方法是在原数组的基础上进行操作，会改变原来的数组。</p>
+<h3 id="concat方法，数组拼接，不改变原数组"><a href="#concat方法，数组拼接，不改变原数组" class="headerlink" title="concat方法，数组拼接，不改变原数组"></a>concat方法，数组拼接，不改变原数组</h3><p>这个方法会先创建当前数组的一个副本（为了不影响原数组），然后将接受到的参数添加到这个副本的末尾，最后返回新构建的数组。</p>
+<h4 id="第一种情况：concat方法没有参数，只是复制当前数组并返回副本"><a href="#第一种情况：concat方法没有参数，只是复制当前数组并返回副本" class="headerlink" title="第一种情况：concat方法没有参数，只是复制当前数组并返回副本"></a>第一种情况：concat方法没有参数，只是复制当前数组并返回副本</h4><pre><code>var colors = [&apos;red&apos;, &apos;blue&apos;, &apos;green&apos;];
+var colors2 = colors.concat();
+console.log(colors);      // [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;]
+console.log(colors2);            // [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;]
+colors2.push(&apos;black&apos;);
+console.log(colors);            // [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;]
+console.log(colors2);            // [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;, &quot;black&quot;]
+</code></pre><p>上面的例子，concat方法没有传入参数，并且为了证明concat方法返回的是一个副本，colors2数组添加了一个元素，结果原来的数组没有改变。</p>
+<h4 id="第二种情况：参数是一个或多个数组，数组的每一项都添加到数组中"><a href="#第二种情况：参数是一个或多个数组，数组的每一项都添加到数组中" class="headerlink" title="第二种情况：参数是一个或多个数组，数组的每一项都添加到数组中"></a>第二种情况：参数是一个或多个数组，数组的每一项都添加到数组中</h4><h4 id="第三种情况：参数不是数组，值就会被简单地加到数组的末尾"><a href="#第三种情况：参数不是数组，值就会被简单地加到数组的末尾" class="headerlink" title="第三种情况：参数不是数组，值就会被简单地加到数组的末尾"></a>第三种情况：参数不是数组，值就会被简单地加到数组的末尾</h4><pre><code>var colors = [&apos;red&apos;, &apos;blue&apos;, &apos;green&apos;];
+var colors2 = colors.concat([&apos;white&apos;, &apos;black&apos;], &apos;pink&apos;);
+console.log(colors);  //  [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;]
+console.log(colors2);  // [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;, &quot;white&quot;, &quot;black&quot;, &quot;pink&quot;]
+</code></pre><h3 id="slice方法，数组分割，不改变原数组"><a href="#slice方法，数组分割，不改变原数组" class="headerlink" title="slice方法，数组分割，不改变原数组"></a>slice方法，数组分割，不改变原数组</h3><p>基于当前数组中的一个或多个元素创建一个新数组。</p>
+<h4 id="第一种情况：只有一个参数，从该参数指定位置到数组末尾的所有元素。"><a href="#第一种情况：只有一个参数，从该参数指定位置到数组末尾的所有元素。" class="headerlink" title="第一种情况：只有一个参数，从该参数指定位置到数组末尾的所有元素。"></a>第一种情况：只有一个参数，从该参数指定位置到数组末尾的所有元素。</h4><h4 id="第二种情况：两个参数，起始到结束位置的所有元素，不包括结束位置的元素。"><a href="#第二种情况：两个参数，起始到结束位置的所有元素，不包括结束位置的元素。" class="headerlink" title="第二种情况：两个参数，起始到结束位置的所有元素，不包括结束位置的元素。"></a>第二种情况：两个参数，起始到结束位置的所有元素，不包括结束位置的元素。</h4><pre><code>var colors = [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;, &quot;white&quot;, &quot;black&quot;, &quot;pink&quot;];
+var colors1 = colors.slice(2);
+var colors2 = colors.slice(2, 5);
+console.log(colors);  // [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;, &quot;white&quot;, &quot;black&quot;, &quot;pink&quot;]
+console.log(colors1);  // [&quot;green&quot;, &quot;white&quot;, &quot;black&quot;, &quot;pink&quot;]
+console.log(colors2);  // [&quot;green&quot;, &quot;white&quot;, &quot;black&quot;]
+</code></pre><p>注意：参数是负数的话，就加上数组长度变成正数，如果结束位置小于起始位置，返回空数组。</p>
+<h3 id="splice方法，什么都能做，会改变原数组"><a href="#splice方法，什么都能做，会改变原数组" class="headerlink" title="splice方法，什么都能做，会改变原数组"></a>splice方法，什么都能做，会改变原数组</h3><p>这个方法很强大，也很灵活，拼接和分割可以用前面的方法，如果是要替换呢？这个方法能做前面两种活，还能做替换，一一详细说明。</p>
+<h4 id="删除，两个参数，第一个表示起始位置，第二个表示删除的个数"><a href="#删除，两个参数，第一个表示起始位置，第二个表示删除的个数" class="headerlink" title="删除，两个参数，第一个表示起始位置，第二个表示删除的个数"></a>删除，两个参数，第一个表示起始位置，第二个表示删除的个数</h4><pre><code>var colors = [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;, &quot;white&quot;, &quot;black&quot;, &quot;pink&quot;];
+// 从第一个位置开始删除2个元素
+var remove = colors.splice(1, 2);
+console.log(colors);  // [&quot;red&quot;, &quot;white&quot;, &quot;black&quot;, &quot;pink&quot;]
+console.log(remove);  // [&quot;blue&quot;, &quot;green&quot;]
+</code></pre><p>该方法是直接在原数组上进行操作，方法结束后原来的数组发生改变，返回的是操作的结果。上面的例子，原来的数组少了两个元素，返回的结果就是被删除的那两个元素。</p>
+<h4 id="插入，三个参数，第一个表示起始位置，第二个位0，表示不删除元素，第三个元素为插入的元素（可以多个）"><a href="#插入，三个参数，第一个表示起始位置，第二个位0，表示不删除元素，第三个元素为插入的元素（可以多个）" class="headerlink" title="插入，三个参数，第一个表示起始位置，第二个位0，表示不删除元素，第三个元素为插入的元素（可以多个）"></a>插入，三个参数，第一个表示起始位置，第二个位0，表示不删除元素，第三个元素为插入的元素（可以多个）</h4><pre><code>var colors = [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;];
+// 从第一个位置开始插入3个元素
+var remove = colors.splice(1, 0, &quot;white&quot;, &quot;black&quot;, &quot;pink&quot;);
+console.log(colors);  // [&quot;red&quot;, &quot;white&quot;, &quot;black&quot;, &quot;pink&quot;, &quot;blue&quot;, &quot;green&quot;]
+console.log(remove);  // []
+</code></pre><p>由于没有删除元素，该方法返回一个空数组。</p>
+<h4 id="替换，三个参数，第一个起始位置，第二个删除元素个数，第三个为替换的元素（可以多个）"><a href="#替换，三个参数，第一个起始位置，第二个删除元素个数，第三个为替换的元素（可以多个）" class="headerlink" title="替换，三个参数，第一个起始位置，第二个删除元素个数，第三个为替换的元素（可以多个）"></a>替换，三个参数，第一个起始位置，第二个删除元素个数，第三个为替换的元素（可以多个）</h4><pre><code>var colors = [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;];
+// 从第一个位置删除一个元素，在添加3个元素
+var remove = colors.splice(1, 1, &quot;white&quot;, &quot;black&quot;, &quot;pink&quot;);
+console.log(colors);  // [&quot;red&quot;, &quot;white&quot;, &quot;black&quot;, &quot;pink&quot;, &quot;green&quot;]
+console.log(remove);  // [&quot;blue&quot;]
+</code></pre><p>由于删除了第一个位置上的元素，返回了删除的元素。</p>
+<blockquote>
+<p>总结：concat（拼接）和slice（分割）方法返回了一个新数组，不会改变原数组，splice方法很灵活，但是它是在原数组上进行操作，会改变原数组，返回的是一个数组包含的是从原数组中删除的元素。</p>
+</blockquote>
+<p>第一稿于2017-10-2</p>
+<hr>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/10/02/JS-array/" data-id="cj8eem5ab000438jxzmdexjnr" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/10/05/garbage-collection/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          JavaScript 的垃圾收集
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/10/01/JS-Event-performance/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">事件的性能</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/10/05/closure/">闭包，从作用域链说起</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/05/garbage-collection/">JavaScript 的垃圾收集</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/02/JS-array/">JavaScript 的数组汇总</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/JS-Event-performance/">事件的性能</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/JS-Event/">事件处理程序</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Mengxin Wu<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

@@ -61,6 +61,373 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-closure" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/05/closure/" class="article-date">
+  <time datetime="2017-10-05T08:17:54.000Z" itemprop="datePublished">2017-10-05</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/05/closure/">闭包，从作用域链说起</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>曾经在CSDN上写过一篇文章《闭包，应该从作用域链说起》。那篇文章写得比较啰嗦，打算重新写一次，力求写得更明白更直接。</p>
+<h2 id="闭包是什么"><a href="#闭包是什么" class="headerlink" title="闭包是什么"></a>闭包是什么</h2><p>校招参加面试，基本上都会问问你是怎么理解闭包的，我的回答是闭包应该从作用域链上的角度来说，因为如果没有作用域链，就根本不会出现闭包。闭包引用了包含函数的活动对象，因此它可以访问包含函数的变量。所以我打算从作用域开始写起。</p>
+<h2 id="执行环境和变量对象"><a href="#执行环境和变量对象" class="headerlink" title="执行环境和变量对象"></a>执行环境和变量对象</h2><p>JavaScript 经常会提起<strong>执行环境</strong>（后面简称环境），毫不夸张这个概念应该是JavaScript 中最重要的了。</p>
+<blockquote>
+<p><strong>环境</strong>定义了变量或函数有权访问的其他数据，决定了它们各自的行为。每个环境都有一个关联的<strong>变量对象</strong>，环境中定义的所有变量和函数都保存在这个对象中。</p>
+</blockquote>
+<p>我们现在开始从JavaScript 的底层来解析我们的代码是怎么执行的，所以一开始的时候会慢慢来解释所有概念。从上面的解释来看，环境是什么？应该是可以访问的变量，环境和变量对象是对应的，能访问的变量和函数都存在这个变量对象中。这样解释也很难理解，用一个简单的例子来说明：window对象都应该比较熟悉，所有的全局变量和函数都是作为window对象的属性和方法，看下面的例子:</p>
+<pre><code>var tmp =&apos;hello&apos;;
+function myFunc() {
+  console.log(&apos;hello&apos;);
+}
+console.log(tmp === window.tmp);        // true
+console.log(myFunc === window.myFunc);  // true
+</code></pre><p>window对象就被认为是一个全局环境（最外围的一个环境），按照定义来说全局环境和window对象关联，<strong>在全局环境中定义的变量和函数都保存在window对象中</strong>。这一步应该可以理解，再重复一遍，全局环境的变量对象就是window对象，全局环境中的变量和函数都保存在window对象中，第一步就理解到这里。</p>
+<p>第二步我们说说环境的特点：<strong>某个环境的代码执行完毕后，该环境就会被销毁，保存在其中的所有变量和函数定义都会随之销毁</strong>。比如我们已经知道了全局环境，它什么时候销毁呢？当应用程序退出的时候（关闭网页或浏览器），这个全局环境就会被销毁，该环境中的变量和函数都不存在了，因为保存它们的window对象被销毁了。那么除了全局环境，还有什么环境？那就是函数环境了，其实也只有两种环境（全局环境和函数环境）。下一步再详细说明的就是函数的环境。</p>
+<blockquote>
+<p>每一个函数都有自己的环境，当执行流进入一个函数时，<strong>函数环境</strong>会被推入一个函数栈中。而在函数执行完成之后，栈会将其环境弹出，把控制权返回给之前的执行环境。</p>
+</blockquote>
+<p>相比于全局环境，函数环境才是我们最关心的。上面一段话也解释了JavaScript 是如何执行我们的代码的，依靠环境栈来控制执行流，到目前为止我们总结一下：<strong>环境和变量对象（全局环境和window对象，函数环境和变量对象），环境的特点，环境栈（JavaScript 执行流）</strong>。</p>
+<h2 id="作用域链"><a href="#作用域链" class="headerlink" title="作用域链"></a>作用域链</h2><p>在理解前面的环境和变量对象之后，就要面对这篇文章最核心的内容：作用域链。</p>
+<blockquote>
+<p>代码在环境中执行时，会为变量对象创建一个<strong>作用域链</strong>，它的作用是保证对环境有权访问的所有变量和函数的有序访问。作用域链的前端总是当前执行的代码所在环境的变量对象。</p>
+<p>如果是函数环境，变量对象则为“<strong>活动对象</strong>”，在最开始的时候只包含一个变量（arguments对象）。作用域链的下一个变量对象来自包含（外部）环境，而再下一个变量对象来自下一个外部环境，全局环境的变量对象（window对象）始终是作用域链中的最后一个变量对象。</p>
+</blockquote>
+<p>上面两段话，用最简洁的语言表达了作用域链，当然也很难理解。有几个关键的地方使我们需要注意的：</p>
+<ol>
+<li>作用域链是一条环境的变量对象的链，每一个值都是一个环境的变量对象。</li>
+<li>作用域链的作用是实现了有序访问，既然是链那就有方向，第一个是当前环境的变量对象，最后一个是全局环境的window对象。</li>
+<li>函数环境的变量对象叫做活动对象。</li>
+</ol>
+<p>下面这个例子我会一行一行代码地来分析：</p>
+<pre><code>function add(num1, num2) {
+  var sum = num1 + num2;
+  return sum;
+}
+
+var total = add(5, 10);
+console.log(total);
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/10/05/closure/" data-id="cj8eem5ae000638jxxk0e4xxz" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-garbage-collection" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/05/garbage-collection/" class="article-date">
+  <time datetime="2017-10-05T02:09:29.000Z" itemprop="datePublished">2017-10-05</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/05/garbage-collection/">JavaScript 的垃圾收集</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>JavaScript 具有自动垃圾收集机制：找出那些不再继续使用的变量，释放其占用的内存，并且来及收集器会按照固定的时间间隔周期性地执行这一操作。</p>
+</blockquote>
+<p>JavaScript 具备自动垃圾收集的功能，不用再关心内存的使用问题，比如分配、使用和回收内存。这对程序员来说很方便，但是如果随意使用的话，很容易出现内存泄漏的问题，所以还是有必要去了解JavaScript 的垃圾收集机制，在我们写代码的时候注意一些规范可以避免内存泄漏的问题。</p>
+<h2 id="标记清除，最常用的垃圾收集方式"><a href="#标记清除，最常用的垃圾收集方式" class="headerlink" title="标记清除，最常用的垃圾收集方式"></a>标记清除，最常用的垃圾收集方式</h2><p>该方式很容易理解，变量进入环境（函数里定义变量），就将该变量标记为“<strong>进入环境</strong>”，进入环境的变量其占用的内存是不能被释放的。变量离开环境（函数执行完成），则将其标记为“<strong>离开环境</strong>”。对于那些“离开环境”的变量，环境已经无法访问到，由垃圾收集器来完成内存清除工作，释放这些变量占用的内存。</p>
+<p>目前大多数浏览器仍然支持该方式，不同的是垃圾收集的间隔不一样。</p>
+<h2 id="引用计数，不太常用，是将来趋势"><a href="#引用计数，不太常用，是将来趋势" class="headerlink" title="引用计数，不太常用，是将来趋势"></a>引用计数，不太常用，是将来趋势</h2><p>该方式比前一种复杂，问题也比较多，但是它有一定的好处。<strong>引用计数的含义：跟踪记录每个值被引用的次数。</strong> 声明一个变量，并且将引用类型的值赋给该变量，这个引用类型的值的引用次数就是1。如果该值又赋给了另一个变量，则该值的引用次数加1 。如果包含该值的变量取了别的值，则引用次数减1 。如果该引用类型的值的引用次数为0， 说明没有办法再访问这个值了，其占用的内存就需要被释放回收了。等到垃圾收集器下一次运行的时候，就会来释放这些引用次数为0的值所占用的内存。举个例子：</p>
+<pre><code>// 声明变量为一个对象，该对象的引用次数为1
+var obj1 = {key1: &apos;value1&apos;};
+// 该对象又赋给另一个变量，引用次数加1等于2
+var obj2 = obj1;
+console.log(obj1, obj2);
+// 包含对象的变量取得了另一个值，引用次数减1
+obj1 = null;                  // 引用次数为1
+obj2 = null;                  // 引用次数为0
+// 引用次数为0，该对象已经无法访问到，回收其占用内存
+console.log(obj1, obj2);
+</code></pre><p>上面的例子注释写得很清楚了，当下一次垃圾收集器运行时，对象占用的内存就会被释放。现在看来引用计数的方式还是很不错的，不过当出现下面的情况时，问题就来了，还比较严重：</p>
+<pre><code>function problem() {
+  // 这两个对象的引用次数在声明时，都是1
+  var obj1 = new Object();
+  var obj2 = new Object();
+  // 这两个对象又被赋给了别的变量（对象的属性），引用次数加1等于2
+  obj1.someObj = obj2;
+  obj2.anotherObj = obj1;
+  console.log(obj1, obj2);
+}
+</code></pre><p>上面的例子，是一个很严重的bug，叫做“<strong>循环引用</strong>”。打印obj1和obj2的值，它们的值会循环使用这两个对象的值，你引用我，我引用你，你再引用我，一直重复下去。对于这两个对象，如果采用标记清除的方式，没有任何问题，函数执行完成，这两个对象离开了函数作用域，标记为“离开环境”，自然垃圾收集器会自动来释放它们占用的内存。但是如果是引用计数的方式的话，可以看到即使函数执行完成，obj1和obj2还是存在的，因为它们的引用计数是2，这两个对象永远不会被回收，这里内存就发生泄漏了。</p>
+<p>只要存在循环引用，则引用类型的值的引用次数就永远不会变成0，自然也就不会被释放，就会产生内存泄漏。解决这样的问题，就需要我们手动地来解除引用，在我们不再使用这些值的时候。常用的解除方式就是变量的值设为null，这就切断了变量和它之前引用的值之间的联系，使得引用次数可以变成0，这样就会被垃圾收集器回收，上面的例子可以这样解除：</p>
+<pre><code>// 不再需要使用这两个对象的时候
+obj1.someObj = null;
+obj2.anotherObj = null;
+console.log(obj1, obj2);
+</code></pre><h2 id="管理内存，为全局变量和全局对象的属性解除引用"><a href="#管理内存，为全局变量和全局对象的属性解除引用" class="headerlink" title="管理内存，为全局变量和全局对象的属性解除引用"></a>管理内存，为全局变量和全局对象的属性解除引用</h2><p>这不是垃圾收集的方式，而是我们平时写代码的一种规范。JavaScript 虽然具备自动垃圾收集机制，但这并不意味着我们可以随意使用变量，因为分配给浏览器的内存会有一定的限制，因此需要我们用最少的内存让页面获得更好的性能。最佳方式就是“<strong>解除引用</strong>”，当变量不再使用的时候，将其设为null来释放其引用，主要是来释放大多数全局变量和全局对象的属性。局部变量会在离开环境时自动被解除引用。下面的这个例子就详细说明了如何来解除引用：</p>
+<pre><code>function createPerson(name) {
+  var localPerson = new Object();
+  localPerson.name = name;
+  return localPerson;
+}
+var globalPerson = createPerson(&apos;Test&apos;);
+console.log(globalPerson);
+// 不再使用变量时手工解除globalPerson的引用
+globalPerson = null;
+</code></pre><p>在上面的例子中，首先看到的是局部变量localPerson在函数执行完毕后，就离开了执行环境，它会自动解除引用，无需我们显式地为它去解除（默认执行了localPerson=null）。但是对于全局变量globalPerson，则需要我们不再使用它的时候为它手工解除引用，将其值设为null。解除引用的真正作用是让值脱离执行环境，使得垃圾收集器下次运行时可以把它们进行回收。</p>
+<h2 id="内存泄漏"><a href="#内存泄漏" class="headerlink" title="内存泄漏"></a>内存泄漏</h2><p>之前一直在提内存泄漏，其实就是分配的内存无法对它进行回收，之前说过了一种情况，如果出现循环引用，则变量的引用次数永远不会变成0，这样改变量也就永远不会被回收。这里再具体说一种内存泄漏的情况，以及如何消除这种情况。还是先看一个内存泄漏的例子，也是我们平常经常会写的例子。</p>
+<pre><code>function assignHandle() {
+  var btn = document.getElementById(&apos;myBtn&apos;);
+  btn.onclick = function () {
+    console.log(btn.id);
+  };
+}
+</code></pre><p>上面的例子，创建了一个作为btn元素事件处理程序（函数）的闭包，匿名函数（事件处理程序）保存了对assignHandle()的活动对象的引用，因此就会导致无法减少btn的引用次数。匿名函数始终存在，btn的引用次数不会变成0 ，因此btn所占用的内存就永远不会被回收，这就造成了内存泄漏。</p>
+<p>上面的解释涉及了闭包，其实内存泄漏的根源就是闭包，但是不是所有闭包都会造成内存泄漏，但是内存泄漏一定和闭包有关。闭包的根源是JavaScript 的作用域链，关于闭包可以看另一篇文章《闭包，从作用域链说起》。这里不解释闭包，但是发生了内存泄漏是显然可以看见的，变量btn永远不会被回收。想要解决这样的问题，就可以用之前的方法，使用<strong>解除引用</strong>。再看下面的代码：</p>
+<pre><code>function assignHandle() {
+  var btn = document.getElementById(&apos;myBtn&apos;);
+  var id = btn.id;
+  btn.onclick = function () {
+    console.log(id);
+  };
+  btn = null;
+}
+</code></pre><p>和上面的例子的区别：创建btn.id的一个副本保存在一个变量中，在闭包中引用该变量就消除了循环引用。另外闭包会引用包含函数的整个活动对象，这里就是匿名函数（事件处理程序）引用了assignHandle()的整个活动对象，其中包含着btn变量。即使闭包没有直接使用btn变量，包含函数的活动对象也仍然会保存一个引用。这里就是说即使匿名函数（事件处理程序）没有直接使用变量btn，但是assignHandle()的活动对象中的变量btn仍然会保存一个引用。因此还是会出现内存泄漏的情况，只要匿名函数存在，assignHandle()的活动对象的变量btn的引用次数都不会变成0 。要想解除引用的话也很简单，手动将其值设为null即可，这样就能解除对DOM对象的引用，引用次数就会变成0 ，被垃圾收集器回收。</p>
+<blockquote>
+<p>总结：这一部分内容主要围绕了JavaScript 的垃圾收集机制，也探讨了内存管理和内存泄漏。虽然JavaScript 不像其他语言那样需要手动管理内存，但是仍然需要我们关注，用最少的内存提升页面的性能。这里面背后蕴含了JavaScript 最基本也是最深刻的知识，闭包来源于作用域链，这是JavaScript 两大链之一（作用域链和原型链），是JavaScript 程序员提升自己能力的必走之路。</p>
+</blockquote>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/10/05/garbage-collection/" data-id="cj8eem5ag000738jx49wf5mxo" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-JS-array" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/02/JS-array/" class="article-date">
+  <time datetime="2017-10-02T01:40:54.000Z" itemprop="datePublished">2017-10-02</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/02/JS-array/">JavaScript 的数组汇总</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>该文章会不断更新…</p>
+<h2 id="数组的操作方法"><a href="#数组的操作方法" class="headerlink" title="数组的操作方法"></a>数组的操作方法</h2><p>数组的内容比较多，一次性也写不完，先写三个操作方法，concat()，slice()，splice()。前面两个方法有一些共性：<strong>1.返回一个新的数组；2.不会改变原数组</strong>。第三个方法是在原数组的基础上进行操作，会改变原来的数组。</p>
+<h3 id="concat方法，数组拼接，不改变原数组"><a href="#concat方法，数组拼接，不改变原数组" class="headerlink" title="concat方法，数组拼接，不改变原数组"></a>concat方法，数组拼接，不改变原数组</h3><p>这个方法会先创建当前数组的一个副本（为了不影响原数组），然后将接受到的参数添加到这个副本的末尾，最后返回新构建的数组。</p>
+<h4 id="第一种情况：concat方法没有参数，只是复制当前数组并返回副本"><a href="#第一种情况：concat方法没有参数，只是复制当前数组并返回副本" class="headerlink" title="第一种情况：concat方法没有参数，只是复制当前数组并返回副本"></a>第一种情况：concat方法没有参数，只是复制当前数组并返回副本</h4><pre><code>var colors = [&apos;red&apos;, &apos;blue&apos;, &apos;green&apos;];
+var colors2 = colors.concat();
+console.log(colors);      // [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;]
+console.log(colors2);            // [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;]
+colors2.push(&apos;black&apos;);
+console.log(colors);            // [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;]
+console.log(colors2);            // [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;, &quot;black&quot;]
+</code></pre><p>上面的例子，concat方法没有传入参数，并且为了证明concat方法返回的是一个副本，colors2数组添加了一个元素，结果原来的数组没有改变。</p>
+<h4 id="第二种情况：参数是一个或多个数组，数组的每一项都添加到数组中"><a href="#第二种情况：参数是一个或多个数组，数组的每一项都添加到数组中" class="headerlink" title="第二种情况：参数是一个或多个数组，数组的每一项都添加到数组中"></a>第二种情况：参数是一个或多个数组，数组的每一项都添加到数组中</h4><h4 id="第三种情况：参数不是数组，值就会被简单地加到数组的末尾"><a href="#第三种情况：参数不是数组，值就会被简单地加到数组的末尾" class="headerlink" title="第三种情况：参数不是数组，值就会被简单地加到数组的末尾"></a>第三种情况：参数不是数组，值就会被简单地加到数组的末尾</h4><pre><code>var colors = [&apos;red&apos;, &apos;blue&apos;, &apos;green&apos;];
+var colors2 = colors.concat([&apos;white&apos;, &apos;black&apos;], &apos;pink&apos;);
+console.log(colors);  //  [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;]
+console.log(colors2);  // [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;, &quot;white&quot;, &quot;black&quot;, &quot;pink&quot;]
+</code></pre><h3 id="slice方法，数组分割，不改变原数组"><a href="#slice方法，数组分割，不改变原数组" class="headerlink" title="slice方法，数组分割，不改变原数组"></a>slice方法，数组分割，不改变原数组</h3><p>基于当前数组中的一个或多个元素创建一个新数组。</p>
+<h4 id="第一种情况：只有一个参数，从该参数指定位置到数组末尾的所有元素。"><a href="#第一种情况：只有一个参数，从该参数指定位置到数组末尾的所有元素。" class="headerlink" title="第一种情况：只有一个参数，从该参数指定位置到数组末尾的所有元素。"></a>第一种情况：只有一个参数，从该参数指定位置到数组末尾的所有元素。</h4><h4 id="第二种情况：两个参数，起始到结束位置的所有元素，不包括结束位置的元素。"><a href="#第二种情况：两个参数，起始到结束位置的所有元素，不包括结束位置的元素。" class="headerlink" title="第二种情况：两个参数，起始到结束位置的所有元素，不包括结束位置的元素。"></a>第二种情况：两个参数，起始到结束位置的所有元素，不包括结束位置的元素。</h4><pre><code>var colors = [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;, &quot;white&quot;, &quot;black&quot;, &quot;pink&quot;];
+var colors1 = colors.slice(2);
+var colors2 = colors.slice(2, 5);
+console.log(colors);  // [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;, &quot;white&quot;, &quot;black&quot;, &quot;pink&quot;]
+console.log(colors1);  // [&quot;green&quot;, &quot;white&quot;, &quot;black&quot;, &quot;pink&quot;]
+console.log(colors2);  // [&quot;green&quot;, &quot;white&quot;, &quot;black&quot;]
+</code></pre><p>注意：参数是负数的话，就加上数组长度变成正数，如果结束位置小于起始位置，返回空数组。</p>
+<h3 id="splice方法，什么都能做，会改变原数组"><a href="#splice方法，什么都能做，会改变原数组" class="headerlink" title="splice方法，什么都能做，会改变原数组"></a>splice方法，什么都能做，会改变原数组</h3><p>这个方法很强大，也很灵活，拼接和分割可以用前面的方法，如果是要替换呢？这个方法能做前面两种活，还能做替换，一一详细说明。</p>
+<h4 id="删除，两个参数，第一个表示起始位置，第二个表示删除的个数"><a href="#删除，两个参数，第一个表示起始位置，第二个表示删除的个数" class="headerlink" title="删除，两个参数，第一个表示起始位置，第二个表示删除的个数"></a>删除，两个参数，第一个表示起始位置，第二个表示删除的个数</h4><pre><code>var colors = [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;, &quot;white&quot;, &quot;black&quot;, &quot;pink&quot;];
+// 从第一个位置开始删除2个元素
+var remove = colors.splice(1, 2);
+console.log(colors);  // [&quot;red&quot;, &quot;white&quot;, &quot;black&quot;, &quot;pink&quot;]
+console.log(remove);  // [&quot;blue&quot;, &quot;green&quot;]
+</code></pre><p>该方法是直接在原数组上进行操作，方法结束后原来的数组发生改变，返回的是操作的结果。上面的例子，原来的数组少了两个元素，返回的结果就是被删除的那两个元素。</p>
+<h4 id="插入，三个参数，第一个表示起始位置，第二个位0，表示不删除元素，第三个元素为插入的元素（可以多个）"><a href="#插入，三个参数，第一个表示起始位置，第二个位0，表示不删除元素，第三个元素为插入的元素（可以多个）" class="headerlink" title="插入，三个参数，第一个表示起始位置，第二个位0，表示不删除元素，第三个元素为插入的元素（可以多个）"></a>插入，三个参数，第一个表示起始位置，第二个位0，表示不删除元素，第三个元素为插入的元素（可以多个）</h4><pre><code>var colors = [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;];
+// 从第一个位置开始插入3个元素
+var remove = colors.splice(1, 0, &quot;white&quot;, &quot;black&quot;, &quot;pink&quot;);
+console.log(colors);  // [&quot;red&quot;, &quot;white&quot;, &quot;black&quot;, &quot;pink&quot;, &quot;blue&quot;, &quot;green&quot;]
+console.log(remove);  // []
+</code></pre><p>由于没有删除元素，该方法返回一个空数组。</p>
+<h4 id="替换，三个参数，第一个起始位置，第二个删除元素个数，第三个为替换的元素（可以多个）"><a href="#替换，三个参数，第一个起始位置，第二个删除元素个数，第三个为替换的元素（可以多个）" class="headerlink" title="替换，三个参数，第一个起始位置，第二个删除元素个数，第三个为替换的元素（可以多个）"></a>替换，三个参数，第一个起始位置，第二个删除元素个数，第三个为替换的元素（可以多个）</h4><pre><code>var colors = [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;];
+// 从第一个位置删除一个元素，在添加3个元素
+var remove = colors.splice(1, 1, &quot;white&quot;, &quot;black&quot;, &quot;pink&quot;);
+console.log(colors);  // [&quot;red&quot;, &quot;white&quot;, &quot;black&quot;, &quot;pink&quot;, &quot;green&quot;]
+console.log(remove);  // [&quot;blue&quot;]
+</code></pre><p>由于删除了第一个位置上的元素，返回了删除的元素。</p>
+<blockquote>
+<p>总结：concat（拼接）和slice（分割）方法返回了一个新数组，不会改变原数组，splice方法很灵活，但是它是在原数组上进行操作，会改变原数组，返回的是一个数组包含的是从原数组中删除的元素。</p>
+</blockquote>
+<p>第一稿于2017-10-2</p>
+<hr>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/10/02/JS-array/" data-id="cj8eem5ab000438jxzmdexjnr" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-JS-Event-performance" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/01/JS-Event-performance/" class="article-date">
+  <time datetime="2017-10-01T02:41:08.000Z" itemprop="datePublished">2017-10-01</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/01/JS-Event-performance/">事件的性能</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>性能是一个重要的话题，特别是在JavaScript语言中，JS是单线程执行任务的。如果性能不好的话，很容易引起用户感觉上的不适，页面加载很慢，点击没反应之类的问题。这里主要是从事件处理程序上来说明性能的问题。</p>
+<ol>
+<li><p>事件处理程序是一个函数，JS里函数也是对象，需要占用内存，事件处理程序太多也就会导致占用的内存越多，性能也就越差，所以需要控制事件处理程序的数量。</p>
+</li>
+<li><p>事件处理程序需要添加在指定的元素上，而DOM操作是非常耗时的，事件处理程序越多，DOM访问次数也越多，这样会影响页面的交互性能，会有迟钝的感觉。</p>
+</li>
+</ol>
+<h2 id="事件委托"><a href="#事件委托" class="headerlink" title="事件委托"></a>事件委托</h2><p>事件处理程序过多的问题，需要考虑<strong>事件委托</strong>。原理也很简单，利用了事件冒泡。一个事件处理程序可以管理某一类型的所有事件。以下面这个例子来说明：</p>
+<pre><code>&lt;ul id=&quot;links&quot;&gt;
+  &lt;li id=&quot;link1&quot;&gt;link1&lt;/li&gt;
+  &lt;li id=&quot;link2&quot;&gt;link2&lt;/li&gt;
+  &lt;li id=&quot;link3&quot;&gt;link3&lt;/li&gt;
+&lt;/ul&gt;
+</code></pre><p>3个li元素被点击后会执行相应的操作，传统的做法是给每一个li元素都添加事件处理程序，像下面这样：</p>
+<pre><code>var item1 = document.getElementById(&apos;link1&apos;);
+var item2 = document.getElementById(&apos;link2&apos;);
+var item3 = document.getElementById(&apos;link3&apos;);
+
+EventUtil.addHandler(item1, &apos;click&apos;, function(event){
+  console.log(&apos;Link 1.&apos;);
+});
+EventUtil.addHandler(item2, &apos;click&apos;, function(event){
+  console.log(&apos;Link 2&apos;);
+});
+EventUtil.addHandler(item3, &apos;click&apos;, function(event){
+  console.log(&apos;Link 3.&apos;);
+});
+</code></pre><p>上面代码使用了自己封装的跨浏览器的事件处理程序对象（在事件处理程序的那篇博客里有），这样添加的话，需要为每一个元素都添加，如果需要添加的元素很多的话，必然会有很多事件处理程序，占用内存越多性能越差。所以上面的例子完全可以使用事件委托，在DOM树上层次尽量高的地方添加一个就好了，这里就选ul元素。</p>
+<pre><code>var list = document.getElementById(&apos;links&apos;);
+EventUtil.addHandler(list, &apos;click&apos;, function(event) {
+  var target = event.target;
+  switch(target.id) {
+    case &apos;link1&apos;:
+      console.log(&apos;Link 1.&apos;);
+      break;
+    case &apos;link2&apos;:
+      console.log(&apos;Link 2.&apos;);
+      break;
+    case &apos;link3&apos;:
+      console.log(&apos;Link 3.&apos;);
+      break;
+    default:
+      break;
+  }
+});
+</code></pre><p>很明显使用了事件委托，只取得了一个DOM元素，只添加了一个事件处理程序，因为利用了事件冒泡的特性。适合事件委托的事件主要是鼠标（click，mousedown，mouseup）和键盘事件（keydown，keyup，keypress）。</p>
+<blockquote>
+<p>总结：事件委托将一类的事件处理程序减少为一个，利用了事件冒泡的特性，有效地提升了页面的性能。主要体现在两个方面：1.减少DOM的访问次数；2.减少事件处理程序的数量。</p>
+</blockquote>
+<h2 id="移除事件处理程序"><a href="#移除事件处理程序" class="headerlink" title="移除事件处理程序"></a>移除事件处理程序</h2><p>上面说了使用事件委托是从数量上来限制事件处理程序带来的性能影响。但如果事件处理程序不需要的话，不及时清除的话，内存里留有那些“空事件处理程序”， 也会造成内存和性能的问题。说简单点，就是不需要的时候及时移除事件处理程序。</p>
+<h3 id="第一种情况：-文档中移除带有事件处理程序的元素"><a href="#第一种情况：-文档中移除带有事件处理程序的元素" class="headerlink" title="第一种情况： 文档中移除带有事件处理程序的元素"></a>第一种情况： 文档中移除带有事件处理程序的元素</h3><p>这也很好理解，一开始有一个元素，给它添加了一个事件处理程序，然后在别的地方这个元素被移除了（可以是DOM操作，也可以是使用innerHTML直接替换），反正这个元素不再出现在页面上，自然添加在这个元素上的事件处理程序也不会再被执行，这样就变成了“空事件处理程序”。浏览器不会那么智能（最傻的IE），它可不知道这个事件处理程序已经变成了空事件，也就不会把它当做垃圾进行回收，因为事件处理程序程序和元素还保存着引用关系。（这里关于垃圾收集机制不具体解释，有一个方式是引用计数，只要一个对象还保存着引用关系就不会被当做垃圾回收）。既然浏览器不智能，那就我们手动来做这件事，手工移除事件处理程序，这样该事件处理程序的引用次数变成0，会被当做垃圾进行回收。下面的例子就解释了之前说的这么一大段话。</p>
+<pre><code>&lt;div id=&quot;myDiv&quot;&gt;
+  &lt;button id=&quot;myBtn&quot;&gt;Click&lt;/button&gt;
+&lt;/div&gt;
+
+var btn = document.getElementById(&apos;myBtn&apos;);
+    btn.onclick = function() {
+        document.getElementById(&apos;myDiv&apos;).innerHTML = &apos;change div.&apos;;
+    };
+</code></pre><p>上面的例子也很简单，单击button元素，整个div元素就变成了一段文字“change div.”，button元素被替换了，不再在页面上出现，但是事件处理程序和这个button元素还保存着引用关系，只要还存在着这样的引用关系，浏览器就不会把它们当做是垃圾进行回收，没有用了还放在内存里面，这不就是浪费了吗？所以在移除元素或者替换的时候，最好手动去移除事件处理程序（虽然有些浏览器现在比较聪明了，但是IE还是那么傻），针对上面的例子使用的是DOM 0级方法添加的，移除的话就是属性值设为null。</p>
+<pre><code>var btn = document.getElementById(&apos;myBtn&apos;);
+btn.onclick = function() {
+  // 明确某个元素会被移除，手动移除事件处理程序
+  btn.onclick = null;
+  document.getElementById(&apos;myDiv&apos;).innerHTML = &apos;change div.&apos;;
+};
+</code></pre><h2 id="第二种情况：页面卸载"><a href="#第二种情况：页面卸载" class="headerlink" title="第二种情况：页面卸载"></a>第二种情况：页面卸载</h2><p>很多浏览器（尤其是IE）在页面卸载的时候，如果没有把事件处理程序清除干净，那这些剩余的就会滞留在内存中。这样在下次装载或者刷新的时候，它们还存在在内存中，导致内存滞留的对象越来越多，就是因为事件处理程序占用的空间没有被释放。</p>
+<p>解决办法其实已经说了，<strong>在onunload事件（页面卸载事件）里面移除所有的事件处理程序</strong>。如果你使用了事件委托，那很庆幸，这里去移除事件处理程序会很简单，否则的话你要为每一个事件事件处理程序都要写相应的移除处理代码。简单的话，就是在onload事件里添加的内容，需要在onunload事件里相应地去移除。</p>
+<blockquote>
+<p>总结：移除事件处理程序，也会提升页面的性能。第一种情况：在知道元素被移除的时候需要手动去移除事件处理程序；第二种情况：在页面卸载的时候移除所有事件处理程序。</p>
+</blockquote>
+<p>第一稿于2017.10.2</p>
+<hr>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/10/01/JS-Event-performance/" data-id="cj8eem5a7000238jx2zjc2o9d" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-JS-Event" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/10/01/JS-Event/" class="article-date">
@@ -75,7 +442,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2017/10/01/JS-Event/">JS-Event</a>
+      <a class="article-title" href="/2017/10/01/JS-Event/">事件处理程序</a>
     </h1>
   
 
@@ -83,7 +450,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="事件处理程序"><a href="#事件处理程序" class="headerlink" title="事件处理程序"></a>事件处理程序</h1><ol>
+        <ol>
 <li><p>HTML事件处理程序（没人用了）；</p>
 </li>
 <li><p>DOM 0级事件处理程序，每一个事件只支持一个事件处理程序；</p>
@@ -191,7 +558,7 @@ btn.onclick = function() {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/01/JS-Event/" data-id="cj8850s27000211jx15ia4rof" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/01/JS-Event/" data-id="cj8eem5a9000338jx2a364ii4" class="article-share-link">Share</a>
       
       
     </footer>
@@ -306,7 +673,7 @@ person.sayHi();     // Hi, I am Tom
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/09/30/ES6-class/" data-id="cj8850s1t000011jxqun4sddz" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/09/30/ES6-class/" data-id="cj8eem59w000038jx3yup3ncg" class="article-share-link">Share</a>
       
       
     </footer>
@@ -409,7 +776,7 @@ f();   // Fri Sep 29 2017 11:00:57 GMT+0800
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/09/29/ES6-let-const/" data-id="cj8850s23000111jx09cg7p4m" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/09/29/ES6-let-const/" data-id="cj8eem5a4000138jx97m479ds" class="article-share-link">Share</a>
       
       
     </footer>
@@ -445,7 +812,7 @@ f();   // Fri Sep 29 2017 11:00:57 GMT+0800
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/09/28/Test-Hexo/" data-id="cj8850s29000311jxqmd3pm9n" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/09/28/Test-Hexo/" data-id="cj8eem5ac000538jxx7xyir84" class="article-share-link">Share</a>
       
       
     </footer>
@@ -490,7 +857,7 @@ f();   // Fri Sep 29 2017 11:00:57 GMT+0800
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/09/28/hello-world/" data-id="cj8850s2b000411jxad9l26eh" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/09/28/hello-world/" data-id="cj8eem5ah000838jxrjdn4nb4" class="article-share-link">Share</a>
       
       
     </footer>
@@ -530,23 +897,23 @@ f();   // Fri Sep 29 2017 11:00:57 GMT+0800
       <ul>
         
           <li>
-            <a href="/2017/10/01/JS-Event/">JS-Event</a>
+            <a href="/2017/10/05/closure/">闭包，从作用域链说起</a>
           </li>
         
           <li>
-            <a href="/2017/09/30/ES6-class/">ES6-class</a>
+            <a href="/2017/10/05/garbage-collection/">JavaScript 的垃圾收集</a>
           </li>
         
           <li>
-            <a href="/2017/09/29/ES6-let-const/">ES6-let&amp;const</a>
+            <a href="/2017/10/02/JS-array/">JavaScript 的数组汇总</a>
           </li>
         
           <li>
-            <a href="/2017/09/28/Test-Hexo/">Test Hexo</a>
+            <a href="/2017/10/01/JS-Event-performance/">事件的性能</a>
           </li>
         
           <li>
-            <a href="/2017/09/28/hello-world/">Hello World</a>
+            <a href="/2017/10/01/JS-Event/">事件处理程序</a>
           </li>
         
       </ul>
