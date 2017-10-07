@@ -11,10 +11,21 @@
 <meta property="og:url" content="http://yoursite.com/2017/10/05/closure/index.html">
 <meta property="og:site_name" content="净无涯的博客">
 <meta property="og:description" content="曾经在CSDN上写过一篇文章《闭包，应该从作用域链说起》。那篇文章写得比较啰嗦，打算重新写一次，力求写得更明白更直接。 闭包是什么校招参加面试，基本上都会问问你是怎么理解闭包的，我的回答是闭包应该从作用域链上的角度来说，因为如果没有作用域链，就根本不会出现闭包。闭包引用了包含函数的活动对象，因此它可以访问包含函数的变量。所以我打算从作用域开始写起。 执行环境和变量对象JavaScript 经常会提">
-<meta property="og:updated_time" content="2017-10-05T09:17:24.000Z">
+<meta property="og:image" content="http://yoursite.com/img/scope.jpg">
+<meta property="og:image" content="http://yoursite.com/img/scope2.jpg">
+<meta property="og:image" content="http://yoursite.com/img/scope3.jpg">
+<meta property="og:image" content="http://yoursite.com/img/scope4.jpg">
+<meta property="og:image" content="http://yoursite.com/img/scope5.jpg">
+<meta property="og:image" content="http://yoursite.com/img/scope6.jpg">
+<meta property="og:image" content="http://yoursite.com/img/scope7.jpg">
+<meta property="og:image" content="http://yoursite.com/img/scope8.jpg">
+<meta property="og:image" content="http://yoursite.com/img/scope9.jpg">
+<meta property="og:image" content="http://yoursite.com/img/scope10.jpg">
+<meta property="og:updated_time" content="2017-10-07T06:40:06.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="闭包，从作用域链说起">
 <meta name="twitter:description" content="曾经在CSDN上写过一篇文章《闭包，应该从作用域链说起》。那篇文章写得比较啰嗦，打算重新写一次，力求写得更明白更直接。 闭包是什么校招参加面试，基本上都会问问你是怎么理解闭包的，我的回答是闭包应该从作用域链上的角度来说，因为如果没有作用域链，就根本不会出现闭包。闭包引用了包含函数的活动对象，因此它可以访问包含函数的变量。所以我打算从作用域开始写起。 执行环境和变量对象JavaScript 经常会提">
+<meta name="twitter:image" content="http://yoursite.com/img/scope.jpg">
   
     <link rel="alternate" href="/atom.xml" title="净无涯的博客" type="application/atom+xml">
   
@@ -120,14 +131,142 @@ console.log(myFunc === window.myFunc);  // true
   var sum = num1 + num2;
   return sum;
 }
-
 var total = add(5, 10);
 console.log(total);
-</code></pre>
+</code></pre><p>这个例子很简单，首先定义了一个函数 <strong>add()</strong> ，然后定义了一个变量 <strong>total</strong> ，它的值是函数执行后的结果。根据之前的概念，在这里我们分步骤来详细解释JavaScript 到底是如何来执行代码的。</p>
+<ol>
+<li>创建函数add()时发生的事情：在创建add()函数时，会创建一个预先包含全局变量对象（window对象）的作用域链，这个作用域链被保存在函数内部 <strong>[[Scope]]</strong> 属性中，下面这张图片就解释了这个过程，注意在函数创建的时候就已经有作用域链了。</li>
+</ol>
+<p><img src="/img/scope.jpg" alt="Alt text"></p>
+<p>再详细说明一遍，函数创建的时候，函数的属性 <strong>[[Scope]]</strong> 会指向一个原先创建的作用域链，该作用域链已经包含了全局变量对象（window对象）。</p>
+<ol>
+<li>函数add()执行发生的事情：当调用函数add()时，会为函数创建一个函数环境。首先复制函数的 <strong>[[Scope]]</strong> 属性中对象来构建环境的作用域链，然后活动对象（函数环境的变量对象）被创建并被推入到该环境的作用域链的前端，该过程依旧可以使用下面的图片详细解释：</li>
+</ol>
+<p><img src="/img/scope2.jpg" alt="Alt text"></p>
+<p>看图说话，最左边是在调用函数add()时创建的函数环境，第一步先把函数的内部属性 <strong>[[Scope]]</strong> 复制过来构建该函数环境的作用域链，然后创建该函数环境的活动对象（函数环境的变量对象叫做活动对象），最后把该活动对象推入到作用域链的前端，所以可以看到函数环境的活动对象在作用域链的第一位，全局变量对象排在第二位。</p>
+<p>到目前为止，我们比较清楚地了解作用域链是如何生成的。有两个阶段，创建函数的时候就预先创建了作用域链，调用函数的时候创建活动对象推入到作用域链的前端。回过头来，作用域链的作用是保证对环境有权访问的所有变量和函数的有序访问，这又是靠什么实现的？</p>
+<blockquote>
+<p><strong>标识符解析</strong> 是沿着作用域链一级一级地搜索标识符的过程。搜索过程始终从作用域链的前端开始，然后逐级地向后回溯，直至找到标识符为止（找不到就会报错）。</p>
+</blockquote>
+<p>我们辛辛苦苦去理解和创建作用域链的目的，就是提供一个有序的方法来搜索 <strong>标识符</strong> ，作用域链就保证了搜索的过程是有先后的，从作用域链的前面开始，一级一级地向后搜索，直至最外面的全局变量对象。这一下应该明白了 JavaScript 在函数里可以访问函数外的变量。</p>
+<p>再举一个例子，不嫌麻烦地把之前的过程再来一遍，并且展示 <strong>标识符解析</strong> 的过程，例子还是很简单，但是能把背后的作用域链弄得很清楚还是不容易的：</p>
+<pre><code>var color = &apos;blue&apos;;
+function changeColor() {
+  var anotherColor = &apos;red&apos;;
+  function swapColors() {
+    var tempColor = anotherColor;
+    anotherColor = color;
+    color = tempColor;
+    // 这里可以color，anotherColor， tempColor
+    console.log(color, anotherColor, tempColor);
+  }
+  swapColors();
+  // 这里可以color，anotherColor，不能访问tempColor
+  console.log(color, anotherColor);
+}
+changeColor();
+// 这里可以color，不能访问tempColor，anotherColor
+console.log(color);
+</code></pre><p>这个例子上之前的例子稍微复杂一点，还是慢慢一步步来分析。</p>
+<ol>
+<li>定义一个变量 <strong>color</strong> ，该变量看做是全局变量对象（window对象）的一个属性；</li>
+<li>创建了一个函数changeColor()，该函数看做是window对象的一个方法，并且创建函数的时候会创建一个预先包含全局变量对象的的作用域链，保存在该函数的内部属性 <strong>[[Scope]]</strong> 中，如下图所示：<img src="/img/scope3.jpg" alt="Alt text"></li>
+<li>调用函数changeColor()，会创建函数环境并且会复制函数的内部属性来构建自己的作用域链，同时会创建该函数环境的活动对象并推入到作用域链的前端，不过在函数执行过程中又创建了另一个函数swapColors()，同样的道理该函数在创建的时候也会预先创建一个作用域链，<strong>不同的是这个预先创建的作用域链不仅包括全局变量对象还包括了包含函数（外部函数changeColor）的活动对象</strong> ，这一点非常重要。我先画调用changeColor函数的示意图，再画创建swapColor函数的示意图。 <img src="/img/scope4.jpg" alt="Alt text"> 再次不嫌啰嗦的详细解释一下，代码运行到 <strong>changeColor();</strong> ，调用函数changeColor首先会创建一个该函数的环境，图上最左边的框代表这个函数环境，接下来第一件事就是复制函数的内部属性 <strong>[[Scope]]</strong> 来创建该函数环境的作用域链，这里指的就是window对象。第二步就是创建函数环境本身的活动对象，环境里定义的变量 <strong>anotherColor</strong> 和函数 <strong>swapColors</strong> ，还包括 <strong>arguments对象</strong> 都保存在这个活动对象里，图中右上角的框表示的就是这个活动对象。最后一步就是把这个活动对象推入到作用域链的前端，因此我们看到在作用域链里，该函数环境的活动对象是排在第一位的，window对象是排在第二位的。并且按照 <strong>标识符解析</strong> 的规则，在这个函数环境中可以访问的变量的顺序：1.该函数环境中的变量 <strong>anotherColor</strong> ，2.全局环境的变量 <strong>color</strong>。 <img src="/img/scope5.jpg" alt="Alt text"> 在函数changeColor执行过程中又创建了函数swapColor，因此会为函数预先创建一个作用域链，和之前不一样的地方是除了window对象，该作用域链还包含了外部函数（changeColor）的活动对象。另插一句：这是闭包最本质的解释。</li>
+<li>调用函数swapColor，会创建函数环境，并复制函数属性 <strong>[[Scope]]</strong> 来创建函数环境的作用域链，再创建函数环境本身的活动对象，并将该活动对象推入到作用域链的前端。 <img src="/img/scope6.jpg" alt="Alt text"> 这里就不再啰嗦整个过程了，相信前面多次的解释已经明白了如何创建作用域链。 因此在swapColor函数环境里，按照 <strong>标识符解析</strong> ，可访问变量的顺序：1.本函数环境（swapColor）的变量： <strong>tempColor</strong> ，2.外部函数（changeColor）的变量： <strong>anotherColor</strong> ， 3.全局环境的变量： <strong>color</strong> 。 </li>
+</ol>
+<p>上面很辛苦地把这个例子非常详细地解释了作用域链的形成，现在简单总结一下，这个例子一共涉及3个环境：全局环境，changeColor函数环境，swapColor函数环境。</p>
+<ol>
+<li>全局环境有一个变量 <strong>color</strong> 和一个函数 <strong>changeColor()</strong> ，但是该环境却不能访问另外两个函数环境中的变量；</li>
+<li>changeColor环境有一个变量 <strong>anotherColor</strong> 和一个函数 <strong>swapColor()</strong> ，该环境可以访问全局环境的变量 <strong>color</strong> ， 因为全局环境在它的作用域链上，但是却不能访问 swapColor函数环境中的变量；</li>
+<li>swapColor函数环境有一个变量 <strong>tempColor</strong> ，并且该环境既可以访问全局环境的变量，也可以访问changeColor函数环境的变量，因为这两个环境都在它的作用域链上。</li>
+</ol>
+<blockquote>
+<p>总结：内部环境可以通过作用域链访问外部所有的外部环境，但外部环境不能访问内部环境中的任何变量和函数。环境之间的联系是线性、有次序的。每个环境都可以向上搜索作用域链，以查询变量和函数名；但任何环境都不能通过向下搜索作用域链而进入另一个环境。</p>
+<p>我的话：要想访问一个变量，就要看该变量是否在当前环境的作用域链上。</p>
+</blockquote>
+<h2 id="函数表达式"><a href="#函数表达式" class="headerlink" title="函数表达式"></a>函数表达式</h2><p>在正式进入闭包之前，先来说一说函数表达式。之前花费了大量时间来解释作用域链，如果理解了作用域链， <strong>闭包可以看做是作用域链的副作用</strong> 。函数在JavaScript 中可以说是最重要的，我会专门写一篇文章来讨论《函数，JavaScript 的第一等公民》。这里只是介绍了函数的简单用法。</p>
+<p>定义函数的方式：<strong>函数声明</strong> 和 <strong>函数表达式</strong> 。</p>
+<h3 id="函数声明"><a href="#函数声明" class="headerlink" title="函数声明"></a>函数声明</h3><p>最基本的函数定义方式，关键是它有一个重要特征： <strong>函数声明提升</strong> ，执行代码之前会先读取函数声明，也就是可以先调用函数再声明函数，举个例子：</p>
+<pre><code>sayHi();  // Hi!
+function sayHi() {
+  console.log(&apos;Hi!&apos;);
+}
+</code></pre><p>函数声明提升有好处也有坏处，有机会会说到，至于为什么会这样，关系到JavaScript 的词法解析，我们暂且记住：函数声明会出现函数声明提升。</p>
+<h3 id="函数表达式-1"><a href="#函数表达式-1" class="headerlink" title="函数表达式"></a>函数表达式</h3><p>这应该是用的最多的函数定义的方式，上面的例子使用函数表达式后变成：</p>
+<pre><code>var sayHi = function() {
+  console.log(&apos;Hi!&apos;);
+};
+sayHi();  // Hi!
+</code></pre><p>上面代码创建了一个函数并将它赋值给变量 <strong>sayHi</strong> ，这个创建的函数叫做 <strong>匿名函数</strong> （function后面没有标识符），并且函数表达式不再像函数声明那样具有函数声明提升的特征，在使用前必须先声明，因此下面代码会报错：</p>
+<pre><code>sayHi();  // Uncaught TypeError: sayHi is not a function
+var sayHi = function() {
+  console.log(&apos;Hi!&apos;);
+};
+</code></pre><p>函数表达式能够先创建函数再赋值给变量，也能够把函数作为其他函数的值返回（做函数的返回值），下面这个例子将作为 <strong>闭包</strong> 的例子来解析。</p>
+<pre><code>function createComparisonFunction(propertyName) {
+  return function(object1, object2) {
+    var value1 = object1[propertyName];
+    var value2 = object2[propertyName];
+    if(value1 &lt; value2) {
+      return -1;
+    } else if(value1 &gt; value2) {
+      return 1;
+    } else {
+      return 0;
+    }
+  };
+}
+</code></pre><p>在这个函数（createComparisonFunction）里就返回了一个 <strong>匿名函数</strong> 。</p>
+<blockquote>
+<p>函数声明和函数表达式的区别：<strong>函数声明提升</strong> 会使得函数声明可以先使用再声明，但是函数表达式在使用前必须先赋值。</p>
+</blockquote>
+<h2 id="闭包"><a href="#闭包" class="headerlink" title="闭包"></a>闭包</h2><p>终于开始提到闭包，但有了之前大量的铺垫，相信虽然这里才刚刚开始，不过也会很快就结束。</p>
+<blockquote>
+<p><strong>闭包</strong> ：有权访问另一个函数作用域中的变量的函数。</p>
+</blockquote>
+<p>我会在写闭包的时候不间断地把作用域链牵扯进来，闭包的概念有两点需要记住：</p>
+<ol>
+<li>闭包是一个函数，不是理解成一种现象，它就是一个函数，只是具备一些不一样的特性；</li>
+<li>闭包这个函数可以访问另一个函数作用域中的变量，为什么可以访问别的函数中的变量？还记得作用域链里最后一句话，<strong>要想访问一个变量，就要看该变量是否在当前环境的作用域链上</strong>，可以访问很简单，因为这个变量在当前函数环境的作用域链上。</li>
+</ol>
+<p>前面的那个例子，我们定义了函数createComparisonFunction，并返回了一个匿名函数。其中在匿名函数中，代码 <strong>var value1 = object1[propertyName]</strong> 访问了外部函数的变量 <strong>propertyName</strong> 。即使这个匿名函数被返回了，然后在别的地方被调用，但它仍然可以访问变量 <strong>propertyName</strong> ，因此我们可以说这个匿名函数就是一个闭包。 为什么函数createComparisonFunction执行完毕返回了匿名函数后，这个匿名函数在被调用时仍然可以访问函数createComparisonFunction中的变量 <strong>propertyName</strong> 。思路当然是从作用域链上考虑，我们来画作用域链示意图，这里先给出完整的代码：</p>
+<pre><code>function createComparisonFunction(propertyName) {
+  return function(object1, object2) {
+    var value1 = object1[propertyName];
+    var value2 = object2[propertyName];
+    if(value1 &lt; value2) {
+      return -1;
+    } else if(value1 &gt; value2) {
+      return 1;
+    } else {
+      return 0;
+    }
+  };
+}
+var compareNames = createComparisonFunction(&apos;name&apos;);
+var result = compareNames({name: &apos;Tom&apos;}, {name: &apos;Jerry&apos;});
+console.log(result);  // 1
+</code></pre><ol>
+<li>全局环境定义了一个函数 <strong>createComparisonFunction</strong> 和两个变量 <strong>compareNames</strong> ， <strong>result</strong> ，它们都保存在window对象上。并且在创建函数 <strong>createComparisonFunction</strong> 时会预先创建一个包含window对象的作用域链，保存在该函数的内部属性 <strong>[[Scope]]</strong> 上。 <img src="/img/scope7.jpg" alt="Alt text"> </li>
+<li>调用函数 <strong>createComparisonFunction</strong> ，会创建一个函数环境，并复制函数的内部属性创建环境的作用域链，再创建环境的活动对象（arguments对象，参数propertyName），最后将这个活动对象推入到作用域链的前端。 <img src="/img/scope8.jpg" alt="Alt text"> </li>
+<li>函数 <strong>createComparisonFunction</strong> 在执行过程中返回了一个匿名函数，同样会为该匿名函数预先创建一个作用域链，除了包含window对象还包括外部函数环境（createComparisonFunction）的活动对象。 <img src="/img/scope9.jpg" alt="Alt text"> </li>
+<li>函数 <strong>createComparisonFunction</strong> 执行完成后，返回的匿名函数被赋值给变量 <strong>compareNames</strong> ，再调用这个匿名函数，同样会创建一个函数环境，复制函数的内部属性创建环境的作用域链，再创建环境的活动对象（arguments对象，参数object1，object2），并推入到作用域链的前端。 <img src="/img/scope10.jpg" alt="Alt text"> </li>
+</ol>
+<blockquote>
+<p>匿名函数从函数 <strong>createComparisonFunction</strong> 中返回后，它的作用域链被初始化为包含 <strong>createComparisonFunction</strong> 环境的活动对象和window对象。这样匿名函数就可以访问在 <strong>createComparisonFunction</strong> 中定义的所有变量。 最重要的是： <strong>createComparisonFunction</strong> 函数在执行完毕后，其活动对象也不会被销毁，因为匿名函数的作用域链仍然在引用这个活动对象。也就是说，当 <strong>createComparisonFunction</strong> 函数返回后，其执行环境的作用域链会被销毁，但它的活动对象仍然会留在内存中，直到匿名函数被销毁后， <strong>createComparisonFunction</strong> 的活动对象才会被销毁。</p>
+</blockquote>
+<p>上面一段话，总结起来就是 <strong>闭包的作用域链包含了外部函数的活动对象</strong> ，即使外部函数执行完毕，函数环境的作用域链被销毁，但它的活动对象由于闭包仍然存在于内存中。</p>
+<p>由于闭包会携带外部函数的作用域（外部函数的活动对象），因此会占用较多的内存，因此需要慎用闭包。上面的例子，匿名函数的作用域链就包含了外部函数 <strong>**createComparisonFunction</strong> 的活动对象，因此如果明确知道不再使用该匿名函数就需要手动解除引用，像下面这样：</p>
+<pre><code>// 解除匿名函数的引用（以便垃圾收集器回收内存）
+compareNames = null;
+</code></pre><p>至此，关于闭包的理解应该算是比较深入了，后面还会继续补充关于闭包的使用（闭包可以做什么），将放在另一篇文章。</p>
+<p>第一稿于2017.10.7</p>
+<hr>
+
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/05/closure/" data-id="cj8eem5ae000638jxxk0e4xxz" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/05/closure/" data-id="cj8gyc0q70006avjxk2e2knoc" class="article-share-link">Share</a>
       
       
     </footer>
