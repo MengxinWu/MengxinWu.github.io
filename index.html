@@ -61,6 +61,178 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-js-setTimeout" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/08/js-setTimeout/" class="article-date">
+  <time datetime="2017-10-08T06:33:03.000Z" itemprop="datePublished">2017-10-08</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/08/js-setTimeout/">JavaScript 超时和间歇调用</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>JavaScript 虽然是 <strong>单线程</strong> 语言，不过仍然提供了两种方法来调度代码在特定的时间执行。</p>
+<h2 id="1-超时调用-setTimeout"><a href="#1-超时调用-setTimeout" class="headerlink" title="1. 超时调用 setTimeout()"></a>1. 超时调用 setTimeout()</h2><p>这应该会是平时经常用到的，让代码经过一段事件再执行，比如倒计时就会用到，另外JavaScript 的动画实现也需要用到它。</p>
+<ol>
+<li>它是 <strong>window对象</strong> 的方法，因此超时调用的代码都是在 <strong>全局作用域</strong> 中执行的（全局作用域中，非严格模式this指向window对象，严格模式this是undefined）。</li>
+<li>两个参数，第一个是函数，第二个是表示等待多长时间的毫秒数。 重点来了：经过该时间后指定的代码不一定会执行。 <strong>之前说了，JavaScript 是一个单线程的解释器，意味着同一时间只能执行一段代码，所有代码都要放到JavaScript 的任务队列中去，这些任务按照添加的顺序来执行。</strong> 这里提到了任务队列，这就是JavaScript 的执行流。 因此第二个参数的时间只是表示还有多少时间把指定的任务放到任务队列，至于什么时候执行要看任务队列的情况。如果队列空的，那当然就会立即执行，如果不是空的，那就慢慢等吧，所以第二个参数的时间，不是确定的代码执行的时间。</li>
+<li><p>调用setTimeout()会返回一个 <strong>数值ID</strong> ， 表示计划执行代码的唯一标识符，用来取消计划的。使用 <strong>clearTimeout()</strong> 并传入这个数值ID就可以取消超时调用。</p>
+<pre><code>setTimeout(function () {
+    console.log(&apos;setTimeout.&apos;)
+}, 3000);
+</code></pre></li>
+</ol>
+<p>执行上述代码，3秒后（之前解释不一定是3秒）会控制台会打印“setTimeout.”，再看如何取消这个超时调用：</p>
+<pre><code>var timeoutID = setTimeout(function () {
+    console.log(&apos;setTimeout.&apos;)
+}, 3000);
+console.log(timeoutID);  // 1
+clearTimeout(timeoutID);
+</code></pre><p>执行上述代码，什么都不会发生，3秒之后也不会打印，因为在3秒到达之前已经通过 <strong>clearTimeout()</strong> 把这个超时调用取消了。</p>
+<h2 id="2-间歇调用-setInterval"><a href="#2-间歇调用-setInterval" class="headerlink" title="2. 间歇调用 setInterval()"></a>2. 间歇调用 setInterval()</h2><p>和setTimeout()类似，不过它会按照指定的时间间隔重复执行代码。但最好不要使用间歇调用，原因后面会仔细解释。</p>
+<ol>
+<li>它也是 <strong>window对象</strong> 的方法，指定的代码需要在 <strong>全局作用域</strong> 中执行。</li>
+<li>两个参数，和 <strong>setTimeout</strong> 一样。</li>
+<li>同样也会有一个 <strong>数值ID</strong> ，用来取消间歇调用。不过取消间歇调用非常重要，因为 <strong>间歇调用会一直执行到页面卸载</strong> 。</li>
+</ol>
+<p>下面的例子使用间歇调用来模拟倒计时（10-0）：</p>
+<pre><code>var num = 11;
+var min = 0;
+function decrementNumber() {
+    num--;
+    console.log(num);
+    if(num === min) {
+        clearInterval(intervalID);
+    }
+}
+var intervalID = setInterval(decrementNumber, 1000);
+</code></pre><p>执行上述代码，控制台每隔1秒会依次打印10-0 ，完成倒计时。</p>
+<p>在介绍间歇调用 <strong>setInterval</strong> 的时候，说过最好不要使用，上面的例子看似很好，其实暗藏了很大的隐患。如果想到了在介绍超时调用 <strong>setTimeout</strong> 时提到过JavaScript 的任务队列，参数里的时间只是表示经过多少时间把代码放到任务队列，不一定会立即执行。因此在间歇调用的时候每隔固定时间都会把代码放进任务队列，当任务队列比较多的时候，可能出现 <strong>后一个间歇调用在前一个间歇调用结束之前启动</strong> 。为了避免这种现象，实际开发中都是使用超时调用来模拟间歇调用，在确认上一次超时调用结束后再启动下一次超时调用。上面倒计时的例子用超时调用来改写：</p>
+<pre><code>var num = 11;
+var min = 0;
+function decrementNumber() {
+    num--;
+    console.log(num);
+    if(num !== min) {
+        setTimeout(decrementNumber, 1000);
+    }
+}
+setTimeout(decrementNumber, 1000);
+</code></pre><p>使用超时调用 <strong>setTimeout()</strong> 来模拟间歇调用 <strong>setInterval()</strong> 是一种最佳实践，其实这两种办法都没有做到精确的任务调用，尤其是任务比较多的时候，指定的时间可能会有较大的延迟，这取决于JavaScript 是单线程解释。</p>
+<h2 id="3-总结"><a href="#3-总结" class="headerlink" title="3. 总结"></a>3. 总结</h2><blockquote>
+<p>详细介绍了JavaScript 中超时调用setTimeout和间歇调用setInterval，由于JavaScript 是单线程解释器，所以导致这两种方法都不能做到精确的任务调度。另外尽量使用超时调用setTimeout来模拟间歇调用setInterval，避免出现调度错乱的情况。</p>
+</blockquote>
+<p>第一稿于2017.10.8</p>
+<hr>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/10/08/js-setTimeout/" data-id="cj8ifo71f000am7jxmjrc3exo" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-http" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/07/http/" class="article-date">
+  <time datetime="2017-10-07T07:47:56.000Z" itemprop="datePublished">2017-10-07</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/07/http/">HTTP 概述</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>作为前端工程师，HTTP协议是必须了解的。这篇文章不讨论具体的细节，从宏观上来总结HTTP协议。</p>
+<h2 id="HTTP协议"><a href="#HTTP协议" class="headerlink" title="HTTP协议"></a>HTTP协议</h2><blockquote>
+<p>HTTP（超文本传输协议）是服务器和客户端之间通过请求/响应模式传输超文本（HTML文件，CSS文档、JavaScript脚本，图片等）内容的协议。</p>
+</blockquote>
+<h2 id="HTTP报文"><a href="#HTTP报文" class="headerlink" title="HTTP报文"></a>HTTP报文</h2><p>HTTP报文有 <strong>头部、空行、正文</strong> 组成。</p>
+<p>请求报文格式：</p>
+<p><img src="/img/http1.jpg" alt="Alt text"></p>
+<p>响应报文格式：</p>
+<p><img src="/img/http2.png" alt="Alt text"></p>
+<h2 id="HTTP-1-1-使用最广泛的HTTP版本"><a href="#HTTP-1-1-使用最广泛的HTTP版本" class="headerlink" title="HTTP 1.1 使用最广泛的HTTP版本"></a>HTTP 1.1 使用最广泛的HTTP版本</h2><h3 id="长连接"><a href="#长连接" class="headerlink" title="长连接"></a>长连接</h3><p>HTTP1.1 的长连接依赖HTTP请求头部的 <strong>keep-alive</strong> ，</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/10/07/http/" data-id="cj8ifo71d0009m7jxxy93pxnd" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-prototype" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/07/prototype/" class="article-date">
+  <time datetime="2017-10-07T06:44:44.000Z" itemprop="datePublished">2017-10-07</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/07/prototype/">继承，从原型链说起</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>JavaScript 的面向对象，虽然比不上C++那么复杂，但是它也很灵活，尤其是ES6新特性，在面向对象这里提出了很多新的方法，使得JavaScript 的面向对象也越来越有范。面向对象里最重要的应该就是继承了，实现了代码的重用，所以我会同时写两篇文章《继承，从原型链说起》和《ES6带来了类》，分别从传统JavaScript 和ES6 来探讨继承古老而又创新的话题。这篇文章主要写的都是基础，当然也会穿插一些新的内容。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/10/07/prototype/" data-id="cj8ifo71g000bm7jxch4fibik" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-closure" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/10/05/closure/" class="article-date">
@@ -253,7 +425,7 @@ compareNames = null;
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/05/closure/" data-id="cj8gyc0q70006avjxk2e2knoc" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/05/closure/" data-id="cj8ifo7180006m7jxem88xbx5" class="article-share-link">Share</a>
       
       
     </footer>
@@ -354,7 +526,7 @@ globalPerson = null;
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/05/garbage-collection/" data-id="cj8gyc0q80007avjxkt42m46h" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/05/garbage-collection/" data-id="cj8ifo71a0007m7jxm47n3beg" class="article-share-link">Share</a>
       
       
     </footer>
@@ -433,11 +605,23 @@ console.log(remove);  // [&quot;blue&quot;]
 </blockquote>
 <p>第一稿于2017-10-2</p>
 <hr>
+<h2 id="检测数组"><a href="#检测数组" class="headerlink" title="检测数组"></a>检测数组</h2><p>我们知道JavaScript 的数据类型里面是没有数组类型的，使用操作符 <strong>typeof</strong> 得到的是 object。</p>
+<pre><code>var arr = [1, 2, 3];
+console.log(typeof arr); // object
+</code></pre><h3 id="instanceof"><a href="#instanceof" class="headerlink" title="instanceof"></a>instanceof</h3><p>如果想要明确某个对象是数组的话，对于只有一个全局作用域的话，可以使用 <strong>instanceof</strong> 来判断。</p>
+<pre><code>var arr = [1, 2, 3];
+console.log(arr instanceof Array); // true
+</code></pre><p>该方法的问题，只能有一个全局环境，暂时不理解这有什么问题。</p>
+<h3 id="isArray"><a href="#isArray" class="headerlink" title="isArray"></a>isArray</h3><p>使用方法 <strong>Array.isArray()</strong> ,该方法不管数组是在哪个全局环境中创建的。</p>
+<pre><code>var arr = [1, 2, 3];
+console.log(Array.isArray(arr)); // true
+</code></pre><p>第二稿于2017-10-7</p>
+<hr>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/02/JS-array/" data-id="cj8gyc0q30004avjxvvk5bccn" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/02/JS-array/" data-id="cj8ifo7150004m7jxgsce0p5f" class="article-share-link">Share</a>
       
       
     </footer>
@@ -546,7 +730,7 @@ btn.onclick = function() {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/01/JS-Event-performance/" data-id="cj8gyc0pz0002avjxh1xcavyq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/01/JS-Event-performance/" data-id="cj8ifo70y0002m7jxkc3laqs3" class="article-share-link">Share</a>
       
       
     </footer>
@@ -686,7 +870,7 @@ btn.onclick = function() {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/01/JS-Event/" data-id="cj8gyc0q20003avjxb37u5yfg" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/01/JS-Event/" data-id="cj8ifo7100003m7jxryzfzze8" class="article-share-link">Share</a>
       
       
     </footer>
@@ -801,7 +985,7 @@ person.sayHi();     // Hi, I am Tom
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/09/30/ES6-class/" data-id="cj8gyc0pm0000avjxznixhjt1" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/09/30/ES6-class/" data-id="cj8ifo70k0000m7jxy4a8ybz2" class="article-share-link">Share</a>
       
       
     </footer>
@@ -904,88 +1088,7 @@ f();   // Fri Sep 29 2017 11:00:57 GMT+0800
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/09/29/ES6-let-const/" data-id="cj8gyc0pv0001avjxtxtv8s7r" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-Test-Hexo" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/09/28/Test-Hexo/" class="article-date">
-  <time datetime="2017-09-28T10:50:27.000Z" itemprop="datePublished">2017-09-28</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/28/Test-Hexo/">Test Hexo</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="Test-Hexo"><a href="#Test-Hexo" class="headerlink" title="Test Hexo"></a>Test Hexo</h1>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/09/28/Test-Hexo/" data-id="cj8gyc0q50005avjxw6yjl5td" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/09/28/hello-world/" class="article-date">
-  <time datetime="2017-09-28T10:41:46.927Z" itemprop="datePublished">2017-09-28</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/28/hello-world/">Hello World</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/09/28/hello-world/" data-id="cj8gyc0qa0008avjxogu2rrnm" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/09/29/ES6-let-const/" data-id="cj8ifo70u0001m7jx1qjdddn9" class="article-share-link">Share</a>
       
       
     </footer>
@@ -996,6 +1099,10 @@ f();   // Fri Sep 29 2017 11:00:57 GMT+0800
 
   
 
+
+  <nav id="page-nav">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">__('next') &raquo;</a>
+  </nav>
 </section>
         
           <aside id="sidebar">
@@ -1025,23 +1132,23 @@ f();   // Fri Sep 29 2017 11:00:57 GMT+0800
       <ul>
         
           <li>
+            <a href="/2017/10/08/js-setTimeout/">JavaScript 超时和间歇调用</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/07/http/">HTTP 概述</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/07/prototype/">继承，从原型链说起</a>
+          </li>
+        
+          <li>
             <a href="/2017/10/05/closure/">闭包，从作用域链说起</a>
           </li>
         
           <li>
             <a href="/2017/10/05/garbage-collection/">JavaScript 的垃圾收集</a>
-          </li>
-        
-          <li>
-            <a href="/2017/10/02/JS-array/">JavaScript 的数组汇总</a>
-          </li>
-        
-          <li>
-            <a href="/2017/10/01/JS-Event-performance/">事件的性能</a>
-          </li>
-        
-          <li>
-            <a href="/2017/10/01/JS-Event/">事件处理程序</a>
           </li>
         
       </ul>

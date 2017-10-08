@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>JavaScript 超时和间歇调用 | 净无涯的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="JavaScript 虽然是 单线程 语言，不过仍然提供了两种方法来调度代码在特定的时间执行。 1. 超时调用 setTimeout()这应该会是平时经常用到的，让代码经过一段事件再执行，比如倒计时就会用到，另外JavaScript 的动画实现也需要用到它。  它是 window对象 的方法，因此超时调用的代码都是在 全局作用域 中执行的（全局作用域中，非严格模式this指向window对象，严格">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JavaScript 超时和间歇调用">
+<meta property="og:url" content="http://yoursite.com/2017/10/08/js-setTimeout/index.html">
+<meta property="og:site_name" content="净无涯的博客">
+<meta property="og:description" content="JavaScript 虽然是 单线程 语言，不过仍然提供了两种方法来调度代码在特定的时间执行。 1. 超时调用 setTimeout()这应该会是平时经常用到的，让代码经过一段事件再执行，比如倒计时就会用到，另外JavaScript 的动画实现也需要用到它。  它是 window对象 的方法，因此超时调用的代码都是在 全局作用域 中执行的（全局作用域中，非严格模式this指向window对象，严格">
+<meta property="og:updated_time" content="2017-10-08T07:34:15.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JavaScript 超时和间歇调用">
+<meta name="twitter:description" content="JavaScript 虽然是 单线程 语言，不过仍然提供了两种方法来调度代码在特定的时间执行。 1. 超时调用 setTimeout()这应该会是平时经常用到的，让代码经过一段事件再执行，比如倒计时就会用到，另外JavaScript 的动画实现也需要用到它。  它是 window对象 的方法，因此超时调用的代码都是在 全局作用域 中执行的（全局作用域中，非严格模式this指向window对象，严格">
+  
+    <link rel="alternate" href="/atom.xml" title="净无涯的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">净无涯的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-js-setTimeout" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/08/js-setTimeout/" class="article-date">
+  <time datetime="2017-10-08T06:33:03.000Z" itemprop="datePublished">2017-10-08</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      JavaScript 超时和间歇调用
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>JavaScript 虽然是 <strong>单线程</strong> 语言，不过仍然提供了两种方法来调度代码在特定的时间执行。</p>
+<h2 id="1-超时调用-setTimeout"><a href="#1-超时调用-setTimeout" class="headerlink" title="1. 超时调用 setTimeout()"></a>1. 超时调用 setTimeout()</h2><p>这应该会是平时经常用到的，让代码经过一段事件再执行，比如倒计时就会用到，另外JavaScript 的动画实现也需要用到它。</p>
+<ol>
+<li>它是 <strong>window对象</strong> 的方法，因此超时调用的代码都是在 <strong>全局作用域</strong> 中执行的（全局作用域中，非严格模式this指向window对象，严格模式this是undefined）。</li>
+<li>两个参数，第一个是函数，第二个是表示等待多长时间的毫秒数。 重点来了：经过该时间后指定的代码不一定会执行。 <strong>之前说了，JavaScript 是一个单线程的解释器，意味着同一时间只能执行一段代码，所有代码都要放到JavaScript 的任务队列中去，这些任务按照添加的顺序来执行。</strong> 这里提到了任务队列，这就是JavaScript 的执行流。 因此第二个参数的时间只是表示还有多少时间把指定的任务放到任务队列，至于什么时候执行要看任务队列的情况。如果队列空的，那当然就会立即执行，如果不是空的，那就慢慢等吧，所以第二个参数的时间，不是确定的代码执行的时间。</li>
+<li><p>调用setTimeout()会返回一个 <strong>数值ID</strong> ， 表示计划执行代码的唯一标识符，用来取消计划的。使用 <strong>clearTimeout()</strong> 并传入这个数值ID就可以取消超时调用。</p>
+<pre><code>setTimeout(function () {
+    console.log(&apos;setTimeout.&apos;)
+}, 3000);
+</code></pre></li>
+</ol>
+<p>执行上述代码，3秒后（之前解释不一定是3秒）会控制台会打印“setTimeout.”，再看如何取消这个超时调用：</p>
+<pre><code>var timeoutID = setTimeout(function () {
+    console.log(&apos;setTimeout.&apos;)
+}, 3000);
+console.log(timeoutID);  // 1
+clearTimeout(timeoutID);
+</code></pre><p>执行上述代码，什么都不会发生，3秒之后也不会打印，因为在3秒到达之前已经通过 <strong>clearTimeout()</strong> 把这个超时调用取消了。</p>
+<h2 id="2-间歇调用-setInterval"><a href="#2-间歇调用-setInterval" class="headerlink" title="2. 间歇调用 setInterval()"></a>2. 间歇调用 setInterval()</h2><p>和setTimeout()类似，不过它会按照指定的时间间隔重复执行代码。但最好不要使用间歇调用，原因后面会仔细解释。</p>
+<ol>
+<li>它也是 <strong>window对象</strong> 的方法，指定的代码需要在 <strong>全局作用域</strong> 中执行。</li>
+<li>两个参数，和 <strong>setTimeout</strong> 一样。</li>
+<li>同样也会有一个 <strong>数值ID</strong> ，用来取消间歇调用。不过取消间歇调用非常重要，因为 <strong>间歇调用会一直执行到页面卸载</strong> 。</li>
+</ol>
+<p>下面的例子使用间歇调用来模拟倒计时（10-0）：</p>
+<pre><code>var num = 11;
+var min = 0;
+function decrementNumber() {
+    num--;
+    console.log(num);
+    if(num === min) {
+        clearInterval(intervalID);
+    }
+}
+var intervalID = setInterval(decrementNumber, 1000);
+</code></pre><p>执行上述代码，控制台每隔1秒会依次打印10-0 ，完成倒计时。</p>
+<p>在介绍间歇调用 <strong>setInterval</strong> 的时候，说过最好不要使用，上面的例子看似很好，其实暗藏了很大的隐患。如果想到了在介绍超时调用 <strong>setTimeout</strong> 时提到过JavaScript 的任务队列，参数里的时间只是表示经过多少时间把代码放到任务队列，不一定会立即执行。因此在间歇调用的时候每隔固定时间都会把代码放进任务队列，当任务队列比较多的时候，可能出现 <strong>后一个间歇调用在前一个间歇调用结束之前启动</strong> 。为了避免这种现象，实际开发中都是使用超时调用来模拟间歇调用，在确认上一次超时调用结束后再启动下一次超时调用。上面倒计时的例子用超时调用来改写：</p>
+<pre><code>var num = 11;
+var min = 0;
+function decrementNumber() {
+    num--;
+    console.log(num);
+    if(num !== min) {
+        setTimeout(decrementNumber, 1000);
+    }
+}
+setTimeout(decrementNumber, 1000);
+</code></pre><p>使用超时调用 <strong>setTimeout()</strong> 来模拟间歇调用 <strong>setInterval()</strong> 是一种最佳实践，其实这两种办法都没有做到精确的任务调用，尤其是任务比较多的时候，指定的时间可能会有较大的延迟，这取决于JavaScript 是单线程解释。</p>
+<h2 id="3-总结"><a href="#3-总结" class="headerlink" title="3. 总结"></a>3. 总结</h2><blockquote>
+<p>详细介绍了JavaScript 中超时调用setTimeout和间歇调用setInterval，由于JavaScript 是单线程解释器，所以导致这两种方法都不能做到精确的任务调度。另外尽量使用超时调用setTimeout来模拟间歇调用setInterval，避免出现调度错乱的情况。</p>
+</blockquote>
+<p>第一稿于2017.10.8</p>
+<hr>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/10/08/js-setTimeout/" data-id="cj8ifo71f000am7jxmjrc3exo" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/10/07/http/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">HTTP 概述</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/10/08/js-setTimeout/">JavaScript 超时和间歇调用</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/07/http/">HTTP 概述</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/07/prototype/">继承，从原型链说起</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/05/closure/">闭包，从作用域链说起</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/05/garbage-collection/">JavaScript 的垃圾收集</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Mengxin Wu<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

@@ -3,18 +3,21 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Hello World | 净无涯的博客</title>
+  <title>HTTP 概述 | 净无涯的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+  <meta name="description" content="作为前端工程师，HTTP协议是必须了解的。这篇文章不讨论具体的细节，从宏观上来总结HTTP协议。 HTTP协议 HTTP（超文本传输协议）是服务器和客户端之间通过请求/响应模式传输超文本（HTML文件，CSS文档、JavaScript脚本，图片等）内容的协议。  HTTP报文HTTP报文有 头部、空行、正文 组成。 请求报文格式：  响应报文格式：  HTTP 1.1 使用最广泛的HTTP版本长连">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hello World">
-<meta property="og:url" content="http://yoursite.com/2017/09/28/hello-world/index.html">
+<meta property="og:title" content="HTTP 概述">
+<meta property="og:url" content="http://yoursite.com/2017/10/07/http/index.html">
 <meta property="og:site_name" content="净无涯的博客">
-<meta property="og:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
-<meta property="og:updated_time" content="2017-09-28T10:41:46.927Z">
+<meta property="og:description" content="作为前端工程师，HTTP协议是必须了解的。这篇文章不讨论具体的细节，从宏观上来总结HTTP协议。 HTTP协议 HTTP（超文本传输协议）是服务器和客户端之间通过请求/响应模式传输超文本（HTML文件，CSS文档、JavaScript脚本，图片等）内容的协议。  HTTP报文HTTP报文有 头部、空行、正文 组成。 请求报文格式：  响应报文格式：  HTTP 1.1 使用最广泛的HTTP版本长连">
+<meta property="og:image" content="http://yoursite.com/img/http1.jpg">
+<meta property="og:image" content="http://yoursite.com/img/http2.png">
+<meta property="og:updated_time" content="2017-10-07T08:06:51.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hello World">
-<meta name="twitter:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+<meta name="twitter:title" content="HTTP 概述">
+<meta name="twitter:description" content="作为前端工程师，HTTP协议是必须了解的。这篇文章不讨论具体的细节，从宏观上来总结HTTP协议。 HTTP协议 HTTP（超文本传输协议）是服务器和客户端之间通过请求/响应模式传输超文本（HTML文件，CSS文档、JavaScript脚本，图片等）内容的协议。  HTTP报文HTTP报文有 头部、空行、正文 组成。 请求报文格式：  响应报文格式：  HTTP 1.1 使用最广泛的HTTP版本长连">
+<meta name="twitter:image" content="http://yoursite.com/img/http1.jpg">
   
     <link rel="alternate" href="/atom.xml" title="净无涯的博客" type="application/atom+xml">
   
@@ -63,10 +66,10 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-http" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2017/09/28/hello-world/" class="article-date">
-  <time datetime="2017-09-28T10:41:46.927Z" itemprop="datePublished">2017-09-28</time>
+    <a href="/2017/10/07/http/" class="article-date">
+  <time datetime="2017-10-07T07:47:56.000Z" itemprop="datePublished">2017-10-07</time>
 </a>
     
   </div>
@@ -77,7 +80,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      Hello World
+      HTTP 概述
     </h1>
   
 
@@ -85,20 +88,21 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
+        <p>作为前端工程师，HTTP协议是必须了解的。这篇文章不讨论具体的细节，从宏观上来总结HTTP协议。</p>
+<h2 id="HTTP协议"><a href="#HTTP协议" class="headerlink" title="HTTP协议"></a>HTTP协议</h2><blockquote>
+<p>HTTP（超文本传输协议）是服务器和客户端之间通过请求/响应模式传输超文本（HTML文件，CSS文档、JavaScript脚本，图片等）内容的协议。</p>
+</blockquote>
+<h2 id="HTTP报文"><a href="#HTTP报文" class="headerlink" title="HTTP报文"></a>HTTP报文</h2><p>HTTP报文有 <strong>头部、空行、正文</strong> 组成。</p>
+<p>请求报文格式：</p>
+<p><img src="/img/http1.jpg" alt="Alt text"></p>
+<p>响应报文格式：</p>
+<p><img src="/img/http2.png" alt="Alt text"></p>
+<h2 id="HTTP-1-1-使用最广泛的HTTP版本"><a href="#HTTP-1-1-使用最广泛的HTTP版本" class="headerlink" title="HTTP 1.1 使用最广泛的HTTP版本"></a>HTTP 1.1 使用最广泛的HTTP版本</h2><h3 id="长连接"><a href="#长连接" class="headerlink" title="长连接"></a>长连接</h3><p>HTTP1.1 的长连接依赖HTTP请求头部的 <strong>keep-alive</strong> ，</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/09/28/hello-world/" data-id="cj8ifo71c0008m7jxk3g9hsnq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/07/http/" data-id="cj8ifo71d0009m7jxxy93pxnd" class="article-share-link">Share</a>
       
       
     </footer>
@@ -107,15 +111,20 @@
     
 <nav id="article-nav">
   
-    <a href="/2017/09/28/Test-Hexo/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2017/10/08/js-setTimeout/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Newer</strong>
       <div class="article-nav-title">
         
-          Test Hexo
+          JavaScript 超时和间歇调用
         
       </div>
     </a>
   
+  
+    <a href="/2017/10/07/prototype/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">继承，从原型链说起</div>
+    </a>
   
 </nav>
 

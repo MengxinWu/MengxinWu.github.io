@@ -11,7 +11,7 @@
 <meta property="og:url" content="http://yoursite.com/2017/10/02/JS-array/index.html">
 <meta property="og:site_name" content="净无涯的博客">
 <meta property="og:description" content="该文章会不断更新… 数组的操作方法数组的内容比较多，一次性也写不完，先写三个操作方法，concat()，slice()，splice()。前面两个方法有一些共性：1.返回一个新的数组；2.不会改变原数组。第三个方法是在原数组的基础上进行操作，会改变原来的数组。 concat方法，数组拼接，不改变原数组这个方法会先创建当前数组的一个副本（为了不影响原数组），然后将接受到的参数添加到这个副本的末尾，最">
-<meta property="og:updated_time" content="2017-10-02T02:27:28.000Z">
+<meta property="og:updated_time" content="2017-10-07T06:56:14.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="JavaScript 的数组汇总">
 <meta name="twitter:description" content="该文章会不断更新… 数组的操作方法数组的内容比较多，一次性也写不完，先写三个操作方法，concat()，slice()，splice()。前面两个方法有一些共性：1.返回一个新的数组；2.不会改变原数组。第三个方法是在原数组的基础上进行操作，会改变原来的数组。 concat方法，数组拼接，不改变原数组这个方法会先创建当前数组的一个副本（为了不影响原数组），然后将接受到的参数添加到这个副本的末尾，最">
@@ -132,11 +132,23 @@ console.log(remove);  // [&quot;blue&quot;]
 </blockquote>
 <p>第一稿于2017-10-2</p>
 <hr>
+<h2 id="检测数组"><a href="#检测数组" class="headerlink" title="检测数组"></a>检测数组</h2><p>我们知道JavaScript 的数据类型里面是没有数组类型的，使用操作符 <strong>typeof</strong> 得到的是 object。</p>
+<pre><code>var arr = [1, 2, 3];
+console.log(typeof arr); // object
+</code></pre><h3 id="instanceof"><a href="#instanceof" class="headerlink" title="instanceof"></a>instanceof</h3><p>如果想要明确某个对象是数组的话，对于只有一个全局作用域的话，可以使用 <strong>instanceof</strong> 来判断。</p>
+<pre><code>var arr = [1, 2, 3];
+console.log(arr instanceof Array); // true
+</code></pre><p>该方法的问题，只能有一个全局环境，暂时不理解这有什么问题。</p>
+<h3 id="isArray"><a href="#isArray" class="headerlink" title="isArray"></a>isArray</h3><p>使用方法 <strong>Array.isArray()</strong> ,该方法不管数组是在哪个全局环境中创建的。</p>
+<pre><code>var arr = [1, 2, 3];
+console.log(Array.isArray(arr)); // true
+</code></pre><p>第二稿于2017-10-7</p>
+<hr>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/02/JS-array/" data-id="cj8gyc0q30004avjxvvk5bccn" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/02/JS-array/" data-id="cj8ifo7150004m7jxgsce0p5f" class="article-share-link">Share</a>
       
       
     </footer>
@@ -194,23 +206,23 @@ console.log(remove);  // [&quot;blue&quot;]
       <ul>
         
           <li>
+            <a href="/2017/10/08/js-setTimeout/">JavaScript 超时和间歇调用</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/07/http/">HTTP 概述</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/07/prototype/">继承，从原型链说起</a>
+          </li>
+        
+          <li>
             <a href="/2017/10/05/closure/">闭包，从作用域链说起</a>
           </li>
         
           <li>
             <a href="/2017/10/05/garbage-collection/">JavaScript 的垃圾收集</a>
-          </li>
-        
-          <li>
-            <a href="/2017/10/02/JS-array/">JavaScript 的数组汇总</a>
-          </li>
-        
-          <li>
-            <a href="/2017/10/01/JS-Event-performance/">事件的性能</a>
-          </li>
-        
-          <li>
-            <a href="/2017/10/01/JS-Event/">事件处理程序</a>
           </li>
         
       </ul>
