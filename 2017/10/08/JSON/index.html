@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>JavaScript 和 JSON | 净无涯的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="数据格式：XML，JSON，YAML…，用过后面两个，当然从我开始接触互联网，使用的最多的也还是JSON，从PHP传输JSON到现在JavaScript传输JSON，这篇文章主要写的是JavaScript 的JSON。 1. JSON 语法和JavaScript 的数据类型1.1 JSON 表示简单值JSON表示简单值和JavaScript 的语法相同，JSON可以表示字符串、数值、布尔值、nul">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JavaScript 和 JSON">
+<meta property="og:url" content="http://yoursite.com/2017/10/08/JSON/index.html">
+<meta property="og:site_name" content="净无涯的博客">
+<meta property="og:description" content="数据格式：XML，JSON，YAML…，用过后面两个，当然从我开始接触互联网，使用的最多的也还是JSON，从PHP传输JSON到现在JavaScript传输JSON，这篇文章主要写的是JavaScript 的JSON。 1. JSON 语法和JavaScript 的数据类型1.1 JSON 表示简单值JSON表示简单值和JavaScript 的语法相同，JSON可以表示字符串、数值、布尔值、nul">
+<meta property="og:image" content="http://yoursite.com/img/json1.png">
+<meta property="og:updated_time" content="2017-10-08T10:41:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JavaScript 和 JSON">
+<meta name="twitter:description" content="数据格式：XML，JSON，YAML…，用过后面两个，当然从我开始接触互联网，使用的最多的也还是JSON，从PHP传输JSON到现在JavaScript传输JSON，这篇文章主要写的是JavaScript 的JSON。 1. JSON 语法和JavaScript 的数据类型1.1 JSON 表示简单值JSON表示简单值和JavaScript 的语法相同，JSON可以表示字符串、数值、布尔值、nul">
+<meta name="twitter:image" content="http://yoursite.com/img/json1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="净无涯的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">净无涯的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-JSON" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/08/JSON/" class="article-date">
+  <time datetime="2017-10-08T07:46:54.000Z" itemprop="datePublished">2017-10-08</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      JavaScript 和 JSON
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>数据格式：XML，JSON，YAML…，用过后面两个，当然从我开始接触互联网，使用的最多的也还是JSON，从PHP传输JSON到现在JavaScript传输JSON，这篇文章主要写的是JavaScript 的JSON。</p>
+<h2 id="1-JSON-语法和JavaScript-的数据类型"><a href="#1-JSON-语法和JavaScript-的数据类型" class="headerlink" title="1. JSON 语法和JavaScript 的数据类型"></a>1. JSON 语法和JavaScript 的数据类型</h2><h3 id="1-1-JSON-表示简单值"><a href="#1-1-JSON-表示简单值" class="headerlink" title="1.1 JSON 表示简单值"></a>1.1 JSON 表示简单值</h3><p>JSON表示简单值和JavaScript 的语法相同，JSON可以表示字符串、数值、布尔值、null，但是 <strong>JSON不支持JavaScript 的特殊值undefined</strong> ，记住这一点就可以了。另一点就是JavaScript 字符串既可以使用单引号也可以使用双引号，但是 <strong>JSON字符串必须是双引号</strong> 。</p>
+<h3 id="1-2-JSON-表示对象"><a href="#1-2-JSON-表示对象" class="headerlink" title="1.2 JSON 表示对象"></a>1.2 JSON 表示对象</h3><p><strong>重要：JSON中的对象的属性必须要加双引号</strong> ，其他就没有什么区别了。JavaScript 的对象字面量：</p>
+<pre><code>var person = {
+    name: &apos;Tom&apos;,
+    age: 29
+};
+</code></pre><p>JSON中的对象表示为：</p>
+<pre><code>{
+    &quot;name&quot;: &quot;Tom&quot;,
+    &quot;age&quot;: 29
+}
+</code></pre><h3 id="1-3-JSON-表示数组"><a href="#1-3-JSON-表示数组" class="headerlink" title="1.3 JSON 表示数组"></a>1.3 JSON 表示数组</h3><p>JSON数组就是JavaScript 的数组字面量形式，比较简单。</p>
+<blockquote>
+<p>总结：JSON 来表示JavaScript 的数据，1. undefined不能表示， 2. 字符串必须是双引号， 3. 对象的属性名必须加上双引号。</p>
+</blockquote>
+<h2 id="2-JSON-解析和序列化"><a href="#2-JSON-解析和序列化" class="headerlink" title="2. JSON 解析和序列化"></a>2. JSON 解析和序列化</h2><p>这里才是重点，为什么要做解析和序列化？AJAX发送数据到服务器，其中一步就是要把JavaScript 的数据对象转化为JSON数据，服务器接受后再使用别的语言（PHP，Python）把JSON数据转化为相应的数据对象（比如Python字典），在网络传输的数据大部分都是JSON数据。</p>
+<h3 id="2-1-序列化-stringify"><a href="#2-1-序列化-stringify" class="headerlink" title="2.1 序列化 stringify()"></a>2.1 序列化 stringify()</h3><p>早期的JSON解释器是使用JavaScript 的 <strong>eval()</strong> 函数，它可以解析，解释并返回JavaScript 对象和数组。但是很明显 <strong>eval()</strong> 函数本身有风险，因此现在都不会再使用这种方法。</p>
+<p>现在的JavaScript （ES5）定义了全局对象 <strong>JSON对象</strong> ， 有两个方法： <strong>stringify()</strong> 负责把JavaScript 对象序列化为JSON字符串， <strong>parse()</strong> 负责把JSON字符串解析为JavaScript 值。</p>
+<p>JSON.stringify()方法接受三个参数，第一个是要序列化的JavaScript 对象，第二个是过滤器（可以使数组或者是替换函数），第三个是控制缩进和空白符。过滤器是数组，那么结果中将只包含数组列出的属性，看下面的例子：</p>
+<pre><code>var book = {
+    title: &apos;Book&apos;,
+    anthors: [&apos;Tom&apos;, &apos;Jerry&apos;],
+    edition: 3,
+    releaseDate: new Date(2011, 11, 1)
+};
+var jsonText = JSON.stringify(book, [&apos;title&apos;, &apos;edition&apos;]);
+console.log(jsonText);
+// {&quot;title&quot;:&quot;Book&quot;,&quot;edition&quot;:3}
+</code></pre><p>上述代码，通过 <strong>JSON.stringify()</strong> 序列化JavaScript 对象得到的JSON字符串只包含了过滤器数组中包含的属性 <strong>title，edition</strong> 。如果过滤器是一个函数，叫做 <strong>替换函数</strong> ，函数返回的值就是相应键的值，如果返回的是undefined，相应的属性就会被忽略，看下面的例子：</p>
+<pre><code>var book = {
+    title: &apos;Book&apos;,
+    anthors: [&apos;Tom&apos;, &apos;Jerry&apos;],
+    edition: 3,
+    releaseDate: new Date(2011, 11, 1)
+};
+var jsonText = JSON.stringify(book, function(key, value) {
+    switch(key) {
+        case &apos;anthors&apos;:
+            return value.join(&apos;,&apos;);
+        case &apos;releaseDate&apos;:
+            return undefined;
+        default:
+            return value;
+    }
+});
+console.log(jsonText);
+// {&quot;title&quot;:&quot;Book&quot;,&quot;anthors&quot;:&quot;Tom,Jerry&quot;,&quot;edition&quot;:3}
+</code></pre><p>上述代码使用了替换函数，对于属性 <strong>authors</strong> ，返回了数组连接的字符串，并且通过返回undefined忽略了属性 <strong>releaseDate</strong> ，其他属性直接返回。</p>
+<p>第三个参数用于控制结果中的缩进和空白符，如果是数值表示每个级别缩进的空格数（不超过10），如果是字符串，则被用来当做缩进字符（字符串长度不超过10），下面的例子：</p>
+<pre><code>console.log(JSON.stringify(book, null, 4));
+// {
+//     &quot;title&quot;: &quot;Book&quot;,
+//     &quot;anthors&quot;: [
+//         &quot;Tom&quot;,
+//         &quot;Jerry&quot;
+//     ],
+//     &quot;edition&quot;: 3,
+//     &quot;releaseDate&quot;: &quot;2011-11-30T16:00:00.000Z&quot;
+// }
+console.log(JSON.stringify(book, null, &apos;- - &apos;));
+// {
+// - - &quot;title&quot;: &quot;Book&quot;,
+// - - &quot;anthors&quot;: [
+// - - - - &quot;Tom&quot;,
+// - - - - &quot;Jerry&quot;
+// - - ],
+// - - &quot;edition&quot;: 3,
+// - - &quot;releaseDate&quot;: &quot;2011-11-30T16:00:00.000Z&quot;
+// }
+</code></pre><h3 id="2-2-解析-parse"><a href="#2-2-解析-parse" class="headerlink" title="2.2 解析 parse()"></a>2.2 解析 parse()</h3><p>JSON.parse()方法接受两个参数，第一个是解析的JSON字符串，第二个是 <strong>还原函数</strong> 。还原函数返回 <strong>undefined</strong> ，表示要从结果中删除相应的键，如果返回其他值，就将该值插入到结果中。特别是日期字符串转换为Data对象时需要用到还原函数，见下面的例子：</p>
+<pre><code>var book = {
+    title: &apos;Book&apos;,
+    anthors: [&apos;Tom&apos;, &apos;Jerry&apos;],
+    edition: 3,
+    releaseDate: new Date(2011, 11, 1),
+    option: null
+};
+var jsonText = JSON.stringify(book);
+console.log(jsonText);
+// {&quot;title&quot;:&quot;Book&quot;,&quot;anthors&quot;:[&quot;Tom&quot;,&quot;Jerry&quot;],&quot;edition&quot;:3,
+// &quot;releaseDate&quot;:&quot;2011-11-30T16:00:00.000Z&quot;,&quot;option&quot;:null}
+var bookCopy = JSON.parse(jsonText, function(key, value) {
+    if(key === &apos;releaseDate&apos;) {
+        return new Date(value);
+    } else if(key === &apos;option&apos;) {
+        return undefined;
+    } else {
+        return value;
+    }
+});
+console.log(bookCopy);
+</code></pre><p>上述代码首先定义了一个JavaScript 对象，一共有5个属性，其中 <strong>releaseDate</strong> 属性是一个Date对象。然后使用 <strong>JSON.stringify()</strong> 方法进行序列化得到JSON字符串，可以看到JSON字符串里对象的属性名加上了双引号，字符串也是双引号。最后使用 <strong>JSON.parse()</strong> 方法进行解析还原JavaScript 对象，其中使用了 <strong>还原函数</strong> ，对于属性 <strong>option</strong> ，通过返回undefined 删除该属性，对于属性 <strong>releaseDate</strong> ，返回new Date(value)得到一个Date对象，其他属性直接返回，最终结果如下所示：</p>
+<p><img src="/img/json1.png" alt="Alt text"></p>
+<p>第一稿于2017.10.8</p>
+<hr>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/10/08/JSON/" data-id="cj8imchlj0005e6jxn3d0p022" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/10/08/js-setTimeout/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">JavaScript 超时和间歇调用</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/10/08/JSON/">JavaScript 和 JSON</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/08/js-setTimeout/">JavaScript 超时和间歇调用</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/07/http/">HTTP 概述</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/07/prototype/">继承，从原型链说起</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/05/closure/">闭包，从作用域链说起</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Mengxin Wu<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

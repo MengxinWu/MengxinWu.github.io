@@ -61,6 +61,138 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-JSON" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/08/JSON/" class="article-date">
+  <time datetime="2017-10-08T07:46:54.000Z" itemprop="datePublished">2017-10-08</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/08/JSON/">JavaScript 和 JSON</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>数据格式：XML，JSON，YAML…，用过后面两个，当然从我开始接触互联网，使用的最多的也还是JSON，从PHP传输JSON到现在JavaScript传输JSON，这篇文章主要写的是JavaScript 的JSON。</p>
+<h2 id="1-JSON-语法和JavaScript-的数据类型"><a href="#1-JSON-语法和JavaScript-的数据类型" class="headerlink" title="1. JSON 语法和JavaScript 的数据类型"></a>1. JSON 语法和JavaScript 的数据类型</h2><h3 id="1-1-JSON-表示简单值"><a href="#1-1-JSON-表示简单值" class="headerlink" title="1.1 JSON 表示简单值"></a>1.1 JSON 表示简单值</h3><p>JSON表示简单值和JavaScript 的语法相同，JSON可以表示字符串、数值、布尔值、null，但是 <strong>JSON不支持JavaScript 的特殊值undefined</strong> ，记住这一点就可以了。另一点就是JavaScript 字符串既可以使用单引号也可以使用双引号，但是 <strong>JSON字符串必须是双引号</strong> 。</p>
+<h3 id="1-2-JSON-表示对象"><a href="#1-2-JSON-表示对象" class="headerlink" title="1.2 JSON 表示对象"></a>1.2 JSON 表示对象</h3><p><strong>重要：JSON中的对象的属性必须要加双引号</strong> ，其他就没有什么区别了。JavaScript 的对象字面量：</p>
+<pre><code>var person = {
+    name: &apos;Tom&apos;,
+    age: 29
+};
+</code></pre><p>JSON中的对象表示为：</p>
+<pre><code>{
+    &quot;name&quot;: &quot;Tom&quot;,
+    &quot;age&quot;: 29
+}
+</code></pre><h3 id="1-3-JSON-表示数组"><a href="#1-3-JSON-表示数组" class="headerlink" title="1.3 JSON 表示数组"></a>1.3 JSON 表示数组</h3><p>JSON数组就是JavaScript 的数组字面量形式，比较简单。</p>
+<blockquote>
+<p>总结：JSON 来表示JavaScript 的数据，1. undefined不能表示， 2. 字符串必须是双引号， 3. 对象的属性名必须加上双引号。</p>
+</blockquote>
+<h2 id="2-JSON-解析和序列化"><a href="#2-JSON-解析和序列化" class="headerlink" title="2. JSON 解析和序列化"></a>2. JSON 解析和序列化</h2><p>这里才是重点，为什么要做解析和序列化？AJAX发送数据到服务器，其中一步就是要把JavaScript 的数据对象转化为JSON数据，服务器接受后再使用别的语言（PHP，Python）把JSON数据转化为相应的数据对象（比如Python字典），在网络传输的数据大部分都是JSON数据。</p>
+<h3 id="2-1-序列化-stringify"><a href="#2-1-序列化-stringify" class="headerlink" title="2.1 序列化 stringify()"></a>2.1 序列化 stringify()</h3><p>早期的JSON解释器是使用JavaScript 的 <strong>eval()</strong> 函数，它可以解析，解释并返回JavaScript 对象和数组。但是很明显 <strong>eval()</strong> 函数本身有风险，因此现在都不会再使用这种方法。</p>
+<p>现在的JavaScript （ES5）定义了全局对象 <strong>JSON对象</strong> ， 有两个方法： <strong>stringify()</strong> 负责把JavaScript 对象序列化为JSON字符串， <strong>parse()</strong> 负责把JSON字符串解析为JavaScript 值。</p>
+<p>JSON.stringify()方法接受三个参数，第一个是要序列化的JavaScript 对象，第二个是过滤器（可以使数组或者是替换函数），第三个是控制缩进和空白符。过滤器是数组，那么结果中将只包含数组列出的属性，看下面的例子：</p>
+<pre><code>var book = {
+    title: &apos;Book&apos;,
+    anthors: [&apos;Tom&apos;, &apos;Jerry&apos;],
+    edition: 3,
+    releaseDate: new Date(2011, 11, 1)
+};
+var jsonText = JSON.stringify(book, [&apos;title&apos;, &apos;edition&apos;]);
+console.log(jsonText);
+// {&quot;title&quot;:&quot;Book&quot;,&quot;edition&quot;:3}
+</code></pre><p>上述代码，通过 <strong>JSON.stringify()</strong> 序列化JavaScript 对象得到的JSON字符串只包含了过滤器数组中包含的属性 <strong>title，edition</strong> 。如果过滤器是一个函数，叫做 <strong>替换函数</strong> ，函数返回的值就是相应键的值，如果返回的是undefined，相应的属性就会被忽略，看下面的例子：</p>
+<pre><code>var book = {
+    title: &apos;Book&apos;,
+    anthors: [&apos;Tom&apos;, &apos;Jerry&apos;],
+    edition: 3,
+    releaseDate: new Date(2011, 11, 1)
+};
+var jsonText = JSON.stringify(book, function(key, value) {
+    switch(key) {
+        case &apos;anthors&apos;:
+            return value.join(&apos;,&apos;);
+        case &apos;releaseDate&apos;:
+            return undefined;
+        default:
+            return value;
+    }
+});
+console.log(jsonText);
+// {&quot;title&quot;:&quot;Book&quot;,&quot;anthors&quot;:&quot;Tom,Jerry&quot;,&quot;edition&quot;:3}
+</code></pre><p>上述代码使用了替换函数，对于属性 <strong>authors</strong> ，返回了数组连接的字符串，并且通过返回undefined忽略了属性 <strong>releaseDate</strong> ，其他属性直接返回。</p>
+<p>第三个参数用于控制结果中的缩进和空白符，如果是数值表示每个级别缩进的空格数（不超过10），如果是字符串，则被用来当做缩进字符（字符串长度不超过10），下面的例子：</p>
+<pre><code>console.log(JSON.stringify(book, null, 4));
+// {
+//     &quot;title&quot;: &quot;Book&quot;,
+//     &quot;anthors&quot;: [
+//         &quot;Tom&quot;,
+//         &quot;Jerry&quot;
+//     ],
+//     &quot;edition&quot;: 3,
+//     &quot;releaseDate&quot;: &quot;2011-11-30T16:00:00.000Z&quot;
+// }
+console.log(JSON.stringify(book, null, &apos;- - &apos;));
+// {
+// - - &quot;title&quot;: &quot;Book&quot;,
+// - - &quot;anthors&quot;: [
+// - - - - &quot;Tom&quot;,
+// - - - - &quot;Jerry&quot;
+// - - ],
+// - - &quot;edition&quot;: 3,
+// - - &quot;releaseDate&quot;: &quot;2011-11-30T16:00:00.000Z&quot;
+// }
+</code></pre><h3 id="2-2-解析-parse"><a href="#2-2-解析-parse" class="headerlink" title="2.2 解析 parse()"></a>2.2 解析 parse()</h3><p>JSON.parse()方法接受两个参数，第一个是解析的JSON字符串，第二个是 <strong>还原函数</strong> 。还原函数返回 <strong>undefined</strong> ，表示要从结果中删除相应的键，如果返回其他值，就将该值插入到结果中。特别是日期字符串转换为Data对象时需要用到还原函数，见下面的例子：</p>
+<pre><code>var book = {
+    title: &apos;Book&apos;,
+    anthors: [&apos;Tom&apos;, &apos;Jerry&apos;],
+    edition: 3,
+    releaseDate: new Date(2011, 11, 1),
+    option: null
+};
+var jsonText = JSON.stringify(book);
+console.log(jsonText);
+// {&quot;title&quot;:&quot;Book&quot;,&quot;anthors&quot;:[&quot;Tom&quot;,&quot;Jerry&quot;],&quot;edition&quot;:3,
+// &quot;releaseDate&quot;:&quot;2011-11-30T16:00:00.000Z&quot;,&quot;option&quot;:null}
+var bookCopy = JSON.parse(jsonText, function(key, value) {
+    if(key === &apos;releaseDate&apos;) {
+        return new Date(value);
+    } else if(key === &apos;option&apos;) {
+        return undefined;
+    } else {
+        return value;
+    }
+});
+console.log(bookCopy);
+</code></pre><p>上述代码首先定义了一个JavaScript 对象，一共有5个属性，其中 <strong>releaseDate</strong> 属性是一个Date对象。然后使用 <strong>JSON.stringify()</strong> 方法进行序列化得到JSON字符串，可以看到JSON字符串里对象的属性名加上了双引号，字符串也是双引号。最后使用 <strong>JSON.parse()</strong> 方法进行解析还原JavaScript 对象，其中使用了 <strong>还原函数</strong> ，对于属性 <strong>option</strong> ，通过返回undefined 删除该属性，对于属性 <strong>releaseDate</strong> ，返回new Date(value)得到一个Date对象，其他属性直接返回，最终结果如下所示：</p>
+<p><img src="/img/json1.png" alt="Alt text"></p>
+<p>第一稿于2017.10.8</p>
+<hr>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/10/08/JSON/" data-id="cj8imchlj0005e6jxn3d0p022" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-js-setTimeout" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/10/08/js-setTimeout/" class="article-date">
@@ -140,7 +272,7 @@ setTimeout(decrementNumber, 1000);
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/08/js-setTimeout/" data-id="cj8ifo71f000am7jxmjrc3exo" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/08/js-setTimeout/" data-id="cj8imchls000be6jxhkuwpdmo" class="article-share-link">Share</a>
       
       
     </footer>
@@ -186,7 +318,7 @@ setTimeout(decrementNumber, 1000);
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/07/http/" data-id="cj8ifo71d0009m7jxxy93pxnd" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/07/http/" data-id="cj8imchlr000ae6jxyvivcthv" class="article-share-link">Share</a>
       
       
     </footer>
@@ -223,7 +355,7 @@ setTimeout(decrementNumber, 1000);
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/07/prototype/" data-id="cj8ifo71g000bm7jxch4fibik" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/07/prototype/" data-id="cj8imchlu000ce6jxs16u2uqf" class="article-share-link">Share</a>
       
       
     </footer>
@@ -425,7 +557,7 @@ compareNames = null;
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/05/closure/" data-id="cj8ifo7180006m7jxem88xbx5" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/05/closure/" data-id="cj8imchlm0007e6jxejmyqah0" class="article-share-link">Share</a>
       
       
     </footer>
@@ -526,7 +658,7 @@ globalPerson = null;
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/05/garbage-collection/" data-id="cj8ifo71a0007m7jxm47n3beg" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/05/garbage-collection/" data-id="cj8imchlo0008e6jxw61kczvw" class="article-share-link">Share</a>
       
       
     </footer>
@@ -621,7 +753,7 @@ console.log(Array.isArray(arr)); // true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/02/JS-array/" data-id="cj8ifo7150004m7jxgsce0p5f" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/02/JS-array/" data-id="cj8imchli0004e6jxw8pbbj5x" class="article-share-link">Share</a>
       
       
     </footer>
@@ -730,7 +862,7 @@ btn.onclick = function() {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/01/JS-Event-performance/" data-id="cj8ifo70y0002m7jxkc3laqs3" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/01/JS-Event-performance/" data-id="cj8imchle0002e6jxntl9ehev" class="article-share-link">Share</a>
       
       
     </footer>
@@ -870,7 +1002,7 @@ btn.onclick = function() {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/01/JS-Event/" data-id="cj8ifo7100003m7jxryzfzze8" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/01/JS-Event/" data-id="cj8imchlg0003e6jxj6uu3zxa" class="article-share-link">Share</a>
       
       
     </footer>
@@ -985,110 +1117,7 @@ person.sayHi();     // Hi, I am Tom
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/09/30/ES6-class/" data-id="cj8ifo70k0000m7jxy4a8ybz2" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-ES6-let-const" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/09/29/ES6-let-const/" class="article-date">
-  <time datetime="2017-09-29T01:24:31.000Z" itemprop="datePublished">2017-09-29</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/29/ES6-let-const/">ES6-let&amp;const</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="ES6学习笔记1：let-和-const-命令"><a href="#ES6学习笔记1：let-和-const-命令" class="headerlink" title="ES6学习笔记1：let 和 const 命令"></a>ES6学习笔记1：let 和 const 命令</h1><p>这是关于ES6第一个笔记，很开心可以开始这个系列（ES6系列）。正式接触ES6是在学习React时，第一次看到箭头函数，感觉很神奇，之后很少再去写function关键字。当然，ES6神奇的地方远远不止这些。就先从JS变量开始吧。</p>
-<h1 id="let-命令"><a href="#let-命令" class="headerlink" title="let 命令"></a>let 命令</h1><h3 id="let用法和示例"><a href="#let用法和示例" class="headerlink" title="let用法和示例"></a>let用法和示例</h3><blockquote>
-<p>红宝书明确指出：JS没有<strong>块级作用域</strong>。JS中语句中的变量声明会将变量添加到当前的执行环境中。在for循环中可以很明显地看到JS是没有作用域的。</p>
-</blockquote>
-<pre><code>for(var i=0; i&lt;10; i++) {
-    console.log(i);
-}
-console.log(i);  // 10
-</code></pre><p>对于有块级作用域的语言（C，JAVA），在for语句初始化变量的表达式所定义的变量（上面例子的i），只会存在循环体里，循环结束变量就被释放了。之前说了，JS没有块级作用域，for语句创建的i变量被添加到当前的执行环境（这里是全局执行环境），因此在循环结束后仍然可以访问到变量i的值。</p>
-<p>ES6补充了这一块内容，使用<strong>let</strong>来增加块级作用域。let声明的变量只在它所在的代码块有效，同样是上面的一个例子，换成let后的结果就是变量i未定义。</p>
-<pre><code>for(let i=0; i&lt;10; i++) {
-    console.log(i);
-}
-console.log(i); // Uncaught ReferenceError: i is not defined
-</code></pre><p>这是一个非常好的改进，块级作用域的好处是很大的，还是for循环的例子，循环变量i在循环结束就应该被释放掉，以免与后面的其他变量混淆。所以在确定一个变量的作用域的情况下，多使用let来声明变量。</p>
-<p>猜猜看下面两段代码的结果：</p>
-<pre><code>var a = [];
-for(var i=0; i&lt;10; i++) {
-    a[i] = function() {
-        console.log(i);
-    }
-}
-a[6]();
-
-var a = [];
-for(let i=0; i&lt;10; i++) {
-    a[i] = function() {
-        console.log(i);
-    }
-}
-a[6]();
-</code></pre><p>上面两段代码，只有一处不一样，for语句的循环变量i一个是用var声明，一个是用let声明。结果就是第一段是10，第二段是6，猜对了吗？</p>
-<p>第一段代码是一个闭包，不知道有没有看出来，数组a的每一个函数都是一个闭包，它们使用的i变量都是同一个，就是全局的i变量，循环结束，i的变量的值是10，自然调用每个函数时，使用的i变量的值就是10，这个不难，用闭包就可以解释。</p>
-<p>第二段代码首先也是闭包，不过变量i使用let声明，导致i只在一次循环内有效，所以每一次循环的i都是一个新的变量。这句话很关键，可以这样说，第五次循环里的i和第六次循环的i是两个变量，一个存的是5，一个存的是6，因此最后结果是6。感觉是不是找到一个新的方法来消除闭包的影响。</p>
-<h3 id="不存在变量提升"><a href="#不存在变量提升" class="headerlink" title="不存在变量提升"></a>不存在变量提升</h3><p>JS里有很多神奇的地方，比如变量提升，可以在变量声明之前使用它。</p>
-<pre><code>console.log(foo); // undefined
-var foo = 1;
-</code></pre><p>这可不是什么好事情，显得很奇怪，也不严谨，ES6正在严格要求我们写代码的规范，不要去做奇奇怪怪的事情，不符合规范的就让它报错吧。换了let就会出错，因为它不让做这样不好的事情。</p>
-<pre><code>console.log(foo);  // Uncaught ReferenceError: foo is not defined
-let foo = 1;
-</code></pre><h3 id="暂时性死区"><a href="#暂时性死区" class="headerlink" title="暂时性死区"></a>暂时性死区</h3><p>这次不讨论了…以后再补充。</p>
-<h2 id="块级作用域"><a href="#块级作用域" class="headerlink" title="块级作用域"></a>块级作用域</h2><p>之前说了JS没有块级作用域，那么它有什么呢？只有全局作用域和函数作用域。看一个没有块级作用域下因为变量提升做的坏事：</p>
-<pre><code>var tmp = new Date();
-function f() {
-    console.log(tmp);
-    if(false) {
-        var tmp = &apos;test&apos;;
-    }
-}
-f();   // undefined
-</code></pre><p>由于没有块级作用域，if语句里的定义tmp存在于函数f的作用域里，又由于变量提升，导致tmp的值为undefined，因为if语句里面和外面的tmp变量是同一个。原来的目的是if语句外的tmp变量用的函数外的tmp，if语句里声明的tmp变量是独立的。现在在if语句里用let声明试试看：</p>
-<pre><code>var tmp = new Date();
-function f() {
-    console.log(tmp);
-    if(false) {
-        let tmp = &apos;test&apos;;
-    }
-}
-f();   // Fri Sep 29 2017 11:00:57 GMT+0800
-</code></pre><p>现在没有问题了，使用了let来声明tmp变量，它的作用域只局限于if语句里，不会影响到if语句外的tmp变量，它们不是同一个变量。</p>
-<p>let实际上为JS新增了块级作用域。这是个非常好的改进，也取代了广泛应用的立即执行函数表达式（假装是一个块级作用域）。</p>
-<h1 id="const-命令"><a href="#const-命令" class="headerlink" title="const 命令"></a>const 命令</h1><p>const声明一个只读的常量。一旦声明，常量的值就不能改变。改变一个常量肯定会报错。</p>
-<ol>
-<li>const的作用域与let命令相同：只在声明所在的块级作用域内有效。</li>
-<li>const命令声明的常量也是不提升，同样存在暂时性死区，只能在声明的位置后面使用。</li>
-<li>const声明的常量，也与let一样不可重复声明。</li>
-</ol>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/09/29/ES6-let-const/" data-id="cj8ifo70u0001m7jx1qjdddn9" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/09/30/ES6-class/" data-id="cj8imchky0000e6jxnldi7bsx" class="article-share-link">Share</a>
       
       
     </footer>
@@ -1132,6 +1161,10 @@ f();   // Fri Sep 29 2017 11:00:57 GMT+0800
       <ul>
         
           <li>
+            <a href="/2017/10/08/JSON/">JavaScript 和 JSON</a>
+          </li>
+        
+          <li>
             <a href="/2017/10/08/js-setTimeout/">JavaScript 超时和间歇调用</a>
           </li>
         
@@ -1145,10 +1178,6 @@ f();   // Fri Sep 29 2017 11:00:57 GMT+0800
         
           <li>
             <a href="/2017/10/05/closure/">闭包，从作用域链说起</a>
-          </li>
-        
-          <li>
-            <a href="/2017/10/05/garbage-collection/">JavaScript 的垃圾收集</a>
           </li>
         
       </ul>
