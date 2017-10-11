@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>函数，JavaScript 的第一等公民 | 净无涯的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="JavaScript 的函数是对象，有属性和方法，这算是JavaScript 很与众不同的特点了。 函数名是指针 每个函数都是 Function 类型的实例，具有属性和方法。函数名就是一个指向函数对象的指针。——函数是对象，函数名是指针。  函数名就是一个指向函数的指针，它和包含对象指针的其他变量是一样的。既然函数是对象，就会有多个变量指向它，也就是一个函数会有多个名字，看下面的例子： funct">
+<meta property="og:type" content="article">
+<meta property="og:title" content="函数，JavaScript 的第一等公民">
+<meta property="og:url" content="http://yoursite.com/2017/10/11/function/index.html">
+<meta property="og:site_name" content="净无涯的博客">
+<meta property="og:description" content="JavaScript 的函数是对象，有属性和方法，这算是JavaScript 很与众不同的特点了。 函数名是指针 每个函数都是 Function 类型的实例，具有属性和方法。函数名就是一个指向函数对象的指针。——函数是对象，函数名是指针。  函数名就是一个指向函数的指针，它和包含对象指针的其他变量是一样的。既然函数是对象，就会有多个变量指向它，也就是一个函数会有多个名字，看下面的例子： funct">
+<meta property="og:updated_time" content="2017-10-11T02:47:11.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="函数，JavaScript 的第一等公民">
+<meta name="twitter:description" content="JavaScript 的函数是对象，有属性和方法，这算是JavaScript 很与众不同的特点了。 函数名是指针 每个函数都是 Function 类型的实例，具有属性和方法。函数名就是一个指向函数对象的指针。——函数是对象，函数名是指针。  函数名就是一个指向函数的指针，它和包含对象指针的其他变量是一样的。既然函数是对象，就会有多个变量指向它，也就是一个函数会有多个名字，看下面的例子： funct">
+  
+    <link rel="alternate" href="/atom.xml" title="净无涯的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">净无涯的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-function" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/11/function/" class="article-date">
+  <time datetime="2017-10-11T01:02:19.000Z" itemprop="datePublished">2017-10-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      函数，JavaScript 的第一等公民
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>JavaScript 的函数是对象，有属性和方法，这算是JavaScript 很与众不同的特点了。</p>
+<h2 id="函数名是指针"><a href="#函数名是指针" class="headerlink" title="函数名是指针"></a>函数名是指针</h2><blockquote>
+<p>每个函数都是 <strong>Function</strong> 类型的实例，具有属性和方法。函数名就是一个指向函数对象的指针。——函数是对象，函数名是指针。</p>
+</blockquote>
+<p>函数名就是一个指向函数的指针，它和包含对象指针的其他变量是一样的。既然函数是对象，就会有多个变量指向它，也就是一个函数会有多个名字，看下面的例子：</p>
+<pre><code>function sum(num1, num2) {
+    return num1 + num2;
+}
+// 实例一个函数对象，函数名sum指向该函数对象
+console.log(sum(10, 10));  // 20
+// 声明变量anotherSum 也指向了该函数对象
+var anotherSum = sum;
+console.log(anotherSum(10, 10));  // 20
+// 变量sum设为null，切断它与函数的引用关系
+sum = null;
+console.log(sum(10, 10)); // Error
+</code></pre><p>上述代码 <strong>var anotherSum = sum;</strong> sum的值赋给变量anotherSum，实际上是sum和anotherSum都指向了同一个函数， <strong>sum = null;</strong> 把sum设为null，让它与函数断绝关系，使得sum不再指向该函数。</p>
+<p>传统语言C++会有函数重载的概念，JavaScript 虽然没有函数重载，但是可以根据 <strong>arguments</strong> 对象来实现类似函数重载的功能。至于JavaScript 为什么没有函数重载，就是因为 <strong>函数名只是一个指向函数的指针</strong> ，在JavaScript 中不存在同名函数，后来的会自动覆盖前面的，看下面的例子：</p>
+<pre><code>var addSomeNumber = function (num) {
+    return num + 100;
+};
+addSomeNumber = function (num) {
+    return num + 200;
+};
+console.log(addSomeNumber(100)); // 300
+</code></pre><p>上述代码，创建了两个函数，变量addSomeNumber一开始指向了第一个函数，在创建第二个函数时，实际上会覆盖，使得addSomeNumber指向了第一个函数，再次强调：<strong>函数名就是一个指向函数的指针</strong> 。</p>
+<h2 id="函数声明会有函数声明提升"><a href="#函数声明会有函数声明提升" class="headerlink" title="函数声明会有函数声明提升"></a>函数声明会有函数声明提升</h2><p>定义函数有两种方式： <strong>函数声明和函数表达式</strong> ，大多数情况下这两种方式没有太多区别，但是会存在一个 <strong>函数声明提升</strong> 的情况。</p>
+<blockquote>
+<p>解析器会率先读取函数声明，并使其在执行任何代码之前可以访问，至于函数表达式，则必须等到解析器执行到它所在的代码行，才会被解释执行。</p>
+</blockquote>
+<p>上面解释了 <strong>函数声明提升</strong> ，简单的话就是通过函数声明的方式定义的函数，在当前环境的任何地方都可以使用，因为JavaScript 引擎在第一遍会把声明函数并将它们放到源代码的顶部，即使是先调用再声明，JavaScript 也会把函数声明提升到顶部。但是对于函数表达式就不存在这个特性，因此必须先声明再调用，下面的例子就很清楚：</p>
+<pre><code>console.log(sum(10, 10)); // 20
+function sum(num1, num2) {
+    return num1 + num2;
+}
+console.log(anotherSum(10, 10)); // Error
+var anotherSum = function(num1, num2) {
+    return num1 + num2;
+};
+</code></pre><p>上述代码，第一个函数sum使用了函数声明，因为 <strong>函数声明提升</strong> 的关系，所以JavaScript 会将函数声明提升带顶部，即使是先调用了函数sum再声明函数，也会正常执行。但是对于第二个函数anotherSum使用了函数表达式，解析器直到执行所在的代码行才会创建该函数，因此再声明前调用会报错。</p>
+<h2 id="函数的属性"><a href="#函数的属性" class="headerlink" title="函数的属性"></a>函数的属性</h2><p>函数既然是对象，那就会有属性。最特殊的就应该是 <strong>this</strong> 对象，this引用的是函数执行环境的活动对象（全局环境下this指向window对象）。关于环境、活动对象可以查看另一片文章《闭包，从作用域链说起》。</p>
+<p>其实JavaScript 中this是一个很重要的概念，在这里对this的用法做一个总结：</p>
+<blockquote>
+<p>this代表函数运行时自动生成的一个内部对象，只能在函数内部使用，关键：<strong>this始终指向调用函数的那个对象</strong>。</p>
+</blockquote>
+<h3 id="1-纯粹的函数调用，this指向window对象："><a href="#1-纯粹的函数调用，this指向window对象：" class="headerlink" title="1.纯粹的函数调用，this指向window对象："></a>1.纯粹的函数调用，this指向window对象：</h3><pre><code>// 声明变量x等价于设置window对象的x属性为1
+var x = 1;
+function test() {
+    // 纯粹函数调用（不是构造函数），this指向window对象
+    this.x = 2;
+}
+// 纯粹函数调用
+test();
+// 打印变量x等价于打印window对象的x属性
+console.log(x, window.x);  // 2 2
+</code></pre><p>按照this指向调用函数的对象，上述代码调用test函数，调用它的对象是window，因为全局函数都是window对象的方法，因此this指向的就是window对象。</p>
+<h3 id="2-函数作为对象方法，this指向调用该方法的对象："><a href="#2-函数作为对象方法，this指向调用该方法的对象：" class="headerlink" title="2.函数作为对象方法，this指向调用该方法的对象："></a>2.函数作为对象方法，this指向调用该方法的对象：</h3><pre><code>function test() {
+    // 函数作为对象的方法被调用，this指向调用它的对象
+    console.log(this.x);
+}
+var obj = {x: 1};
+// 函数test被当做对象的方法m
+obj.m = test;
+// obj对象调用方法m
+obj.m();  // 1
+</code></pre><p>上述代码也很容易理解，函数test被当做对象obj的方法被调用，因此调用该函数的对象是obj，this也就指向对象obj。</p>
+<h3 id="3-函数被当做构造函数，this指向新创建的对象"><a href="#3-函数被当做构造函数，this指向新创建的对象" class="headerlink" title="3.函数被当做构造函数，this指向新创建的对象"></a>3.函数被当做构造函数，this指向新创建的对象</h3><pre><code>function test() {
+    // this指向新创建的对象obj
+    this.x = 1;
+}
+// 函数当做构造函数
+var obj = new test();
+console.log(obj.x);  // 1
+</code></pre><p>调用构造函数使用 <strong>new</strong> 操作符：1.创建新对象；2.构造函数的作用域赋给新对象（this指向这个新对象）；3.执行构造函数中的代码；4.返回新对象。</p>
+<h3 id="4-apply调用，this指向传入的参数"><a href="#4-apply调用，this指向传入的参数" class="headerlink" title="4.apply调用，this指向传入的参数"></a>4.apply调用，this指向传入的参数</h3><p>apply是函数对象的一个方法，作用是改变函数的调用对象，参数为空时默认调用全局对象：</p>
+<pre><code>var x = 2;
+function test() {
+    console.log(this.x);
+}
+var obj = {x: 1};
+test.apply();   // 2
+test.apply(obj);  // 1
+</code></pre><p>第一次调用apply方法，参数为空的情况this指向window对象，第二次调用，第一个参数为对象obj，因此this指向对象obj。</p>
+<p>第一稿于2017.10.11</p>
+<hr>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/10/11/function/" data-id="cj8mfq5z90008atjxstgj4yte" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/10/09/webpack/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">webpack 模块打包机</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/10/11/function/">函数，JavaScript 的第一等公民</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/09/webpack/">webpack 模块打包机</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/08/JSON/">JavaScript 和 JSON</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/08/js-setTimeout/">JavaScript 超时和间歇调用</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/07/http/">HTTP 概述</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Mengxin Wu<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

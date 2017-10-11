@@ -61,6 +61,231 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-function" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/11/function/" class="article-date">
+  <time datetime="2017-10-11T01:02:19.000Z" itemprop="datePublished">2017-10-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/11/function/">函数，JavaScript 的第一等公民</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>JavaScript 的函数是对象，有属性和方法，这算是JavaScript 很与众不同的特点了。</p>
+<h2 id="函数名是指针"><a href="#函数名是指针" class="headerlink" title="函数名是指针"></a>函数名是指针</h2><blockquote>
+<p>每个函数都是 <strong>Function</strong> 类型的实例，具有属性和方法。函数名就是一个指向函数对象的指针。——函数是对象，函数名是指针。</p>
+</blockquote>
+<p>函数名就是一个指向函数的指针，它和包含对象指针的其他变量是一样的。既然函数是对象，就会有多个变量指向它，也就是一个函数会有多个名字，看下面的例子：</p>
+<pre><code>function sum(num1, num2) {
+    return num1 + num2;
+}
+// 实例一个函数对象，函数名sum指向该函数对象
+console.log(sum(10, 10));  // 20
+// 声明变量anotherSum 也指向了该函数对象
+var anotherSum = sum;
+console.log(anotherSum(10, 10));  // 20
+// 变量sum设为null，切断它与函数的引用关系
+sum = null;
+console.log(sum(10, 10)); // Error
+</code></pre><p>上述代码 <strong>var anotherSum = sum;</strong> sum的值赋给变量anotherSum，实际上是sum和anotherSum都指向了同一个函数， <strong>sum = null;</strong> 把sum设为null，让它与函数断绝关系，使得sum不再指向该函数。</p>
+<p>传统语言C++会有函数重载的概念，JavaScript 虽然没有函数重载，但是可以根据 <strong>arguments</strong> 对象来实现类似函数重载的功能。至于JavaScript 为什么没有函数重载，就是因为 <strong>函数名只是一个指向函数的指针</strong> ，在JavaScript 中不存在同名函数，后来的会自动覆盖前面的，看下面的例子：</p>
+<pre><code>var addSomeNumber = function (num) {
+    return num + 100;
+};
+addSomeNumber = function (num) {
+    return num + 200;
+};
+console.log(addSomeNumber(100)); // 300
+</code></pre><p>上述代码，创建了两个函数，变量addSomeNumber一开始指向了第一个函数，在创建第二个函数时，实际上会覆盖，使得addSomeNumber指向了第一个函数，再次强调：<strong>函数名就是一个指向函数的指针</strong> 。</p>
+<h2 id="函数声明会有函数声明提升"><a href="#函数声明会有函数声明提升" class="headerlink" title="函数声明会有函数声明提升"></a>函数声明会有函数声明提升</h2><p>定义函数有两种方式： <strong>函数声明和函数表达式</strong> ，大多数情况下这两种方式没有太多区别，但是会存在一个 <strong>函数声明提升</strong> 的情况。</p>
+<blockquote>
+<p>解析器会率先读取函数声明，并使其在执行任何代码之前可以访问，至于函数表达式，则必须等到解析器执行到它所在的代码行，才会被解释执行。</p>
+</blockquote>
+<p>上面解释了 <strong>函数声明提升</strong> ，简单的话就是通过函数声明的方式定义的函数，在当前环境的任何地方都可以使用，因为JavaScript 引擎在第一遍会把声明函数并将它们放到源代码的顶部，即使是先调用再声明，JavaScript 也会把函数声明提升到顶部。但是对于函数表达式就不存在这个特性，因此必须先声明再调用，下面的例子就很清楚：</p>
+<pre><code>console.log(sum(10, 10)); // 20
+function sum(num1, num2) {
+    return num1 + num2;
+}
+console.log(anotherSum(10, 10)); // Error
+var anotherSum = function(num1, num2) {
+    return num1 + num2;
+};
+</code></pre><p>上述代码，第一个函数sum使用了函数声明，因为 <strong>函数声明提升</strong> 的关系，所以JavaScript 会将函数声明提升带顶部，即使是先调用了函数sum再声明函数，也会正常执行。但是对于第二个函数anotherSum使用了函数表达式，解析器直到执行所在的代码行才会创建该函数，因此再声明前调用会报错。</p>
+<h2 id="函数的属性"><a href="#函数的属性" class="headerlink" title="函数的属性"></a>函数的属性</h2><p>函数既然是对象，那就会有属性。最特殊的就应该是 <strong>this</strong> 对象，this引用的是函数执行环境的活动对象（全局环境下this指向window对象）。关于环境、活动对象可以查看另一片文章《闭包，从作用域链说起》。</p>
+<p>其实JavaScript 中this是一个很重要的概念，在这里对this的用法做一个总结：</p>
+<blockquote>
+<p>this代表函数运行时自动生成的一个内部对象，只能在函数内部使用，关键：<strong>this始终指向调用函数的那个对象</strong>。</p>
+</blockquote>
+<h3 id="1-纯粹的函数调用，this指向window对象："><a href="#1-纯粹的函数调用，this指向window对象：" class="headerlink" title="1.纯粹的函数调用，this指向window对象："></a>1.纯粹的函数调用，this指向window对象：</h3><pre><code>// 声明变量x等价于设置window对象的x属性为1
+var x = 1;
+function test() {
+    // 纯粹函数调用（不是构造函数），this指向window对象
+    this.x = 2;
+}
+// 纯粹函数调用
+test();
+// 打印变量x等价于打印window对象的x属性
+console.log(x, window.x);  // 2 2
+</code></pre><p>按照this指向调用函数的对象，上述代码调用test函数，调用它的对象是window，因为全局函数都是window对象的方法，因此this指向的就是window对象。</p>
+<h3 id="2-函数作为对象方法，this指向调用该方法的对象："><a href="#2-函数作为对象方法，this指向调用该方法的对象：" class="headerlink" title="2.函数作为对象方法，this指向调用该方法的对象："></a>2.函数作为对象方法，this指向调用该方法的对象：</h3><pre><code>function test() {
+    // 函数作为对象的方法被调用，this指向调用它的对象
+    console.log(this.x);
+}
+var obj = {x: 1};
+// 函数test被当做对象的方法m
+obj.m = test;
+// obj对象调用方法m
+obj.m();  // 1
+</code></pre><p>上述代码也很容易理解，函数test被当做对象obj的方法被调用，因此调用该函数的对象是obj，this也就指向对象obj。</p>
+<h3 id="3-函数被当做构造函数，this指向新创建的对象"><a href="#3-函数被当做构造函数，this指向新创建的对象" class="headerlink" title="3.函数被当做构造函数，this指向新创建的对象"></a>3.函数被当做构造函数，this指向新创建的对象</h3><pre><code>function test() {
+    // this指向新创建的对象obj
+    this.x = 1;
+}
+// 函数当做构造函数
+var obj = new test();
+console.log(obj.x);  // 1
+</code></pre><p>调用构造函数使用 <strong>new</strong> 操作符：1.创建新对象；2.构造函数的作用域赋给新对象（this指向这个新对象）；3.执行构造函数中的代码；4.返回新对象。</p>
+<h3 id="4-apply调用，this指向传入的参数"><a href="#4-apply调用，this指向传入的参数" class="headerlink" title="4.apply调用，this指向传入的参数"></a>4.apply调用，this指向传入的参数</h3><p>apply是函数对象的一个方法，作用是改变函数的调用对象，参数为空时默认调用全局对象：</p>
+<pre><code>var x = 2;
+function test() {
+    console.log(this.x);
+}
+var obj = {x: 1};
+test.apply();   // 2
+test.apply(obj);  // 1
+</code></pre><p>第一次调用apply方法，参数为空的情况this指向window对象，第二次调用，第一个参数为对象obj，因此this指向对象obj。</p>
+<p>第一稿于2017.10.11</p>
+<hr>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/10/11/function/" data-id="cj8mfq5z90008atjxstgj4yte" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-webpack" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/09/webpack/" class="article-date">
+  <time datetime="2017-10-09T08:17:06.000Z" itemprop="datePublished">2017-10-09</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/09/webpack/">webpack 模块打包机</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>webpack 是一个现代 JavaScript 应用程序的 <strong>模块打包机</strong> (module bundler)。当 webpack 处理应用程序时，它会递归地构建一个 <strong>依赖关系图</strong> (dependency graph)，其中包含应用程序需要的每个模块，然后将所有这些模块打包成少量的 bundle - 通常只有一个(bundle.js)，由浏览器加载。</p>
+</blockquote>
+<h2 id="1-入口-Entry"><a href="#1-入口-Entry" class="headerlink" title="1. 入口 (Entry)"></a>1. 入口 (Entry)</h2><p>入口告诉 webpack 从哪里开始，并根据 <strong>依赖关系图</strong> 确定需要打包的内容。可以将应用程序的入口认为是根上下文(contextual root) 或 app 第一个启动文件。</p>
+<p>在 webpack 中，我们使用 webpack <strong>配置对象</strong> 中的 <strong>entry</strong> 属性来定义入口，具体配置：</p>
+<pre><code>module.exports = {
+  entry: &apos;./path/app.js&apos;
+};
+</code></pre><h2 id="2-出口-Output"><a href="#2-出口-Output" class="headerlink" title="2. 出口 (Output)"></a>2. 出口 (Output)</h2><p>将所有的资源(assets)归拢在一起后，还需要告诉 webpack 在哪里打包应用程序。webpack 的 <strong>output</strong> 属性描述了如何处理归拢在一起的代码(bundled code)，具体配置：</p>
+<pre><code>const path = require(&apos;path&apos;);
+module.exports = {
+  entry: &apos;./path/app.js&apos;,
+  output: {
+    path: path.resolve(__dirname, &apos;dist&apos;),
+    filename: &apos;bundle.js&apos;
+  }
+};
+</code></pre><p>在上面的例子中，我们通过 <strong>output.filename</strong> 和 <strong>output.path</strong> 属性，来告诉 webpack bundle 的名称，以及我们想要生成(emit)到哪里。</p>
+<h2 id="3-加载-Loader"><a href="#3-加载-Loader" class="headerlink" title="3. 加载 (Loader)"></a>3. 加载 (Loader)</h2><p>webpack 的目标是，让 webpack 聚焦于项目中的所有资源(asset)，而浏览器不需要关注考虑这些（明确的说，这并不意味着所有资源(asset)都必须打包在一起）。webpack 把每个文件(.css, .html, .scss, .jpg, etc.) 都作为模块处理。然而 webpack 自身只理解 JavaScript。</p>
+<p>webpack loader 在文件被添加到依赖图中时，其转换为模块。</p>
+<p>在更高层面，在 webpack 的配置中 loader 有两个目标。</p>
+<ol>
+<li><p>识别出(identify)应该被对应的 loader 进行转换(transform)的那些文件。(test 属性)</p>
+</li>
+<li><p>转换这些文件，从而使其能够被添加到依赖图中（并且最终添加到 bundle 中）(use 属性)</p>
+<pre><code>const path = require(&apos;path&apos;);
+const config = {
+  entry: &apos;./path/app.js&apos;,
+  output: {
+    path: path.resolve(__dirname, &apos;dist&apos;),
+    filename: &apos;my-first-webpack.bundle.js&apos;
+  },
+  module: {
+    rules: [
+      { test: /\.txt$/, use: &apos;raw-loader&apos; }
+    ]
+  }
+};
+module.exports = config;
+</code></pre></li>
+</ol>
+<p>以上配置中，对一个单独的 module 对象定义了 rules 属性，里面包含两个必须属性：test 和 use。这告诉 webpack 编译器(compiler) 如下信息：</p>
+<blockquote>
+<p>“嘿，webpack 编译器，当你碰到「在 require()/import 语句中被解析为 ‘.txt’ 的路径」时，在你对它打包之前，先使用 raw-loader 转换一下。”</p>
+</blockquote>
+<h2 id="4-插件-Plugins"><a href="#4-插件-Plugins" class="headerlink" title="4. 插件 (Plugins)"></a>4. 插件 (Plugins)</h2><p>然而由于 loader 仅在每个文件的基础上执行转换，而 插件(plugins) 更常用于（但不限于）在打包模块的 “compilation” 和 “chunk” 生命周期执行操作和自定义功能（查看更多）。webpack 的插件系统极其强大和可定制化。</p>
+<p>想要使用一个插件，你只需要 require() 它，然后把它添加到 plugins 数组中。多数插件可以通过选项(option)自定义。你也可以在一个配置文件中因为不同目的而多次使用同一个插件，这时需要通过使用 new 来创建它的一个实例。</p>
+<pre><code>const HtmlWebpackPlugin = require(&apos;html-webpack-plugin&apos;); //installed via npm
+const webpack = require(&apos;webpack&apos;); //to access built-in plugins
+const path = require(&apos;path&apos;);
+const config = {
+  entry: &apos;./path/to/my/entry/file.js&apos;,
+  output: {
+    path: path.resolve(__dirname, &apos;dist&apos;),
+    filename: &apos;my-first-webpack.bundle.js&apos;
+  },
+  module: {
+    rules: [
+      { test: /\.txt$/, use: &apos;raw-loader&apos; }
+    ]
+  },
+  plugins: [
+    new webpack.optimize.UglifyJsPlugin(),
+    new HtmlWebpackPlugin({template: &apos;./src/index.html&apos;})
+  ]
+};
+module.exports = config;
+</code></pre><hr>
+<h2 id="上面把官网上的解释直接拉下来了，还是通过实践来学习效果更好。"><a href="#上面把官网上的解释直接拉下来了，还是通过实践来学习效果更好。" class="headerlink" title="上面把官网上的解释直接拉下来了，还是通过实践来学习效果更好。"></a>上面把官网上的解释直接拉下来了，还是通过实践来学习效果更好。</h2>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/10/09/webpack/" data-id="cj8mfq5zi000eatjxsj4nc71d" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-JSON" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/10/08/JSON/" class="article-date">
@@ -183,7 +408,7 @@ console.log(bookCopy);
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/08/JSON/" data-id="cj8imchlj0005e6jxn3d0p022" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/08/JSON/" data-id="cj8mfq5z50005atjx6tas276i" class="article-share-link">Share</a>
       
       
     </footer>
@@ -272,7 +497,7 @@ setTimeout(decrementNumber, 1000);
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/08/js-setTimeout/" data-id="cj8imchls000be6jxhkuwpdmo" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/08/js-setTimeout/" data-id="cj8mfq5zf000catjxeu58b3m1" class="article-share-link">Share</a>
       
       
     </footer>
@@ -318,7 +543,7 @@ setTimeout(decrementNumber, 1000);
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/07/http/" data-id="cj8imchlr000ae6jxyvivcthv" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/07/http/" data-id="cj8mfq5ze000batjxep1q2d58" class="article-share-link">Share</a>
       
       
     </footer>
@@ -355,7 +580,7 @@ setTimeout(decrementNumber, 1000);
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/07/prototype/" data-id="cj8imchlu000ce6jxs16u2uqf" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/07/prototype/" data-id="cj8mfq5zh000datjxh1n08stq" class="article-share-link">Share</a>
       
       
     </footer>
@@ -557,7 +782,7 @@ compareNames = null;
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/05/closure/" data-id="cj8imchlm0007e6jxejmyqah0" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/05/closure/" data-id="cj8mfq5z80007atjx33o5zzp0" class="article-share-link">Share</a>
       
       
     </footer>
@@ -658,7 +883,7 @@ globalPerson = null;
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/05/garbage-collection/" data-id="cj8imchlo0008e6jxw61kczvw" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/05/garbage-collection/" data-id="cj8mfq5zb0009atjxykiyoh67" class="article-share-link">Share</a>
       
       
     </footer>
@@ -753,7 +978,7 @@ console.log(Array.isArray(arr)); // true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/02/JS-array/" data-id="cj8imchli0004e6jxw8pbbj5x" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/02/JS-array/" data-id="cj8mfq5z30004atjxnmlrl96o" class="article-share-link">Share</a>
       
       
     </footer>
@@ -862,262 +1087,7 @@ btn.onclick = function() {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/01/JS-Event-performance/" data-id="cj8imchle0002e6jxntl9ehev" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-JS-Event" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/10/01/JS-Event/" class="article-date">
-  <time datetime="2017-10-01T00:25:26.000Z" itemprop="datePublished">2017-10-01</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/10/01/JS-Event/">事件处理程序</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <ol>
-<li><p>HTML事件处理程序（没人用了）；</p>
-</li>
-<li><p>DOM 0级事件处理程序，每一个事件只支持一个事件处理程序；</p>
-</li>
-<li><p>IE事件处理程序（看见IE就烦）；</p>
-</li>
-<li><p>DOM 2级事件处理程序（默认使用）。</p>
-</li>
-</ol>
-<p>既然事件处理程序有这么多类型，自然考虑要封装一下，写一个<strong>跨浏览器的事件处理程序</strong>，以上三种方式（第一种不考虑）的优先级：先判断DOM 2级方法，再判断IE方法，最后是DOM 0级方法。</p>
-<h2 id="跨浏览器的事件处理程序"><a href="#跨浏览器的事件处理程序" class="headerlink" title="跨浏览器的事件处理程序"></a>跨浏览器的事件处理程序</h2><p>直接上代码，来源于红宝书。</p>
-<pre><code>var EventUtil = {
-  // 添加事件处理程序
-  addHandler: function(element, type, handler) {
-    // 先判断DOM 2级方法
-    if(element.addEventListener) {
-      // false 表示冒泡阶段调用事件处理程序
-      element.addEventListener(type, handler, false);
-    }
-    // 再判断IE方法
-    else if(element.attachEvent) {
-      // IE方法，事件类型需要加上前缀‘on’
-      element.attachEvent(&apos;on&apos;+type, handler);
-    }
-    // 最后判断DOM 0级方法，一个事件只支持一个事件处理程序
-    else {
-      element[&apos;on&apos;+type] = handler;
-    }
-  },
-  // 移除事件处理程序
-  removeHandler: function(element, type, handler) {
-    if(element.removeEventListener) {
-      element.removeEventListener(type, handler, false);
-    } else if(element.detachEvent) {
-      element.detachEvent(&apos;on&apos;+type, handler);
-    } else {
-      element[&apos;on&apos;+type] = null;
-    }
-  }
-};
-</code></pre><p>以上代码可以作为跨浏览器的事件处理程序，添加事件处理程序如下：</p>
-<pre><code>var btn = document.getElementById(&apos;myBtn&apos;);
-var handler = function() {
-  console.log(&apos;Clicked.&apos;);
-};
-EventUtil.addHandler(btn, &apos;click&apos;, handler);
-</code></pre><p>给button元素的‘click’事件添加了一个事件处理程序，点击button会打印‘Clicked.’，移除事件处理程序如下：</p>
-<pre><code>EventUtil.removeHandler(btn, &apos;click&apos;, handler);
-</code></pre><p>以上代码运行在chorme浏览器，添加和移除事件处理程序都是使用<strong>DOM 2级方法</strong>。IE浏览器8以上也是用DOM 2级方法，8以下（包括8）使用的是IE方法（亲测）。下面就回过头来仔细说说前面几种不同的方法。</p>
-<h2 id="DOM-2级事件处理程序"><a href="#DOM-2级事件处理程序" class="headerlink" title="DOM 2级事件处理程序"></a>DOM 2级事件处理程序</h2><p>我先说DOM 2级方法，是因为目前基本上都是用它来添加或移除事件处理程序。其实就定义了两个方法<strong>addEventListener()和removeEventListener()</strong>。每个DOM节点都有这两个方法，接受三个参数（事件名称，事件处理程序函数，布尔值false）。最后一个参数推荐false表示在冒泡阶段调用事件处理程序（为了兼容浏览器，大多数情况，事件处理程序会被添加到事件流的冒泡阶段）。还是之前的例子，这里只展示用DOM 2级方法来添加、移除事件处理程序。</p>
-<pre><code>var btn = document.getElementById(&apos;myBtn&apos;);
-var handler1 = function() {
-  console.log(&apos;Clicked 1.&apos;);
-};
-var handler2 = function() {
-  console.log(&apos;Clicked 2.&apos;);
-};
-// 参数：事件名称，事件处理程序函数，false表示冒泡阶段执行函数
-btn.addEventListener(&apos;click&apos;, handler1, false);
-btn.addEventListener(&apos;click&apos;, handler2, false);
-</code></pre><p>以上代码为button元素的‘click’事件添加了事件处理程序，该事件在冒泡阶段触发。并且DOM 2级方法有一个明显的好处，就是<strong>可以在一个事件上添加多个事件处理程序</strong>，并且在执行时会按照添加的顺序执行。上面的例子，依次添加了事件处理程序handler1和hendler2，因此在点击button元素后会依次打印‘Clicked 1.’，‘Clicked 2.’。</p>
-<p>使用DOM 2级方法addEventListener()添加的事件处理程序，也必须用DOM 2级方法removeEventListener()来移除。并且传入的参数必须一致，所以添加的时候，<strong>传入了一个匿名函数，该事件处理程序将无法被移除</strong>。因此不要使用匿名函数，可以使用函数定义或函数表达式来显式把函数名来传参，这样在移除的时候就知道是哪一个函数被添加进来了。比如需要移除上面例子的第一个事件处理程序。</p>
-<pre><code>btn.removeEventListener(&apos;click&apos;, handler1, false);
-</code></pre><p>添加上面代码后，再次点击button元素，只有第二个事件处理程序会被执行，只会打印‘Clicked 2.’，说明第一个事件处理程序成功被移除。</p>
-<blockquote>
-<p>总结：1.两个方法addEventListener()和removeEventListener()； 2.一个事件支持多个事件处理程序； 3.添加和移除的事件处理程序必须是一样的，显式传入函数名。</p>
-</blockquote>
-<h2 id="IE事件处理程序"><a href="#IE事件处理程序" class="headerlink" title="IE事件处理程序"></a>IE事件处理程序</h2><p>不想写，没有什么意思，目前该方法会在IE浏览器8以下（包括8）才会被使用。它和DOM 2级方法类似，也定义了两个方法attachEvent()和detachEvent()（起的什么名字）。这两个方法和DOM 2级的两个方法功能是一样的，不过它只有两个参数，因为事件冒泡是IE提出的，所以在IE8之前，IE只支持事件冒泡，也就不存在捕获阶段。以下代码需要在IE浏览器8之前版本（包括8）上运行：</p>
-<pre><code>var btn = document.getElementById(&apos;myBtn&apos;);
-var handler1 = function() {
-  console.log(&apos;Clicked 1.&apos;);
-};
-var handler2 = function() {
-  console.log(&apos;Clicked 2.&apos;);
-};
-
-btn.attachEvent(&apos;onclick&apos;, handler1);
-btn.attachEvent(&apos;onclick&apos;, handler2);
-</code></pre><p>以上代码同样是为button元素的‘click’事件添加事件处理程序，同样一个事件支持多个事件处理程序，奇葩的是，执行的顺序不是按照添加的顺序，而刚刚相反。点击button元素，先打印‘Clicked 2.’，再打印‘Clicked 1.’。这一现象需要在IE浏览器8之前看到，之后改过来了（亲测）。原来的真不知道是怎么想的，IE的东西就是这样奇葩，当然还有更奇葩的地方，默认情况下事件处理程序会在元素的作用域里执行，即this指向事件触发的元素，IE里事件处理程序是在全局作用域里执行，this指向window，这不是反逻辑吗？看下面的例子：</p>
-<pre><code>var btn = document.getElementById(&apos;myBtn&apos;);
-var handler = function() {
-  console.log(this === window);
-};
-btn.attachEvent(&apos;onclick&apos;, handler);
-</code></pre><p>点击button元素，打印的是‘true’，说明在事件处理程序里this指向的是window。</p>
-<blockquote>
-<p>总结：1.两个方法attachEvent()和detachEvent()，只在冒泡阶段执行；2. 一个事件支持多个事件处理程序，奇葩的是顺序和添加的顺序相反；3.添加和移除的事件处理程序函数是一样的，和DOM 2级方法一致；4. 最后就是IE的事件处理程序的作用域是全局作用域，this指向window。</p>
-</blockquote>
-<h2 id="DOM-0级事件处理程序"><a href="#DOM-0级事件处理程序" class="headerlink" title="DOM 0级事件处理程序"></a>DOM 0级事件处理程序</h2><p>只支持DOM 0级方法的浏览器没有多少了，也没什么可以说的。添加事件处理程序就是给把一个函数赋值给一个事件处理程序属性，移除的话就是属性值设为null。另外一点就是DOM 0级方法的每个事件只支持一个事件处理程序。也写一个例子：</p>
-<pre><code>var btn = document.getElementById(&apos;myBtn&apos;);
-btn.onclick = function() {
-  console.log(&apos;My id is &apos;+this.id);
-};
-</code></pre><p>不像前面两种方式，有专门的方法来添加和移除事件处理程序，这里是直接给事件处理程序属性赋值一个函数，代表添加了一个事件处理程序。结果是打印‘My id is myBtn’，从语法上感觉事件处理程序就是元素的一个方法，因此事件处理程序是在元素的作用域里运行，this指向触发事件的当前元素。移除事件处理程序只要给属性值设为null。</p>
-<pre><code>btn.onclick = null;
-</code></pre><blockquote>
-<p>总结：1.事件处理程序作为元素的方法，赋给事件处理程序属性；2.时间处理程序在元素的作用域里运行，this指向当前元素； 3.一个事件只支持一个事件处理程序。</p>
-</blockquote>
-<h2 id="HTML事件处理程序"><a href="#HTML事件处理程序" class="headerlink" title="HTML事件处理程序"></a>HTML事件处理程序</h2><p>不写了，这才是没有什么好写的，写一个例子结束。</p>
-<pre><code>&lt;button id=&quot;myBtn&quot; onclick=&quot;console.log(&apos;click!&apos;);&quot;&gt;Click&lt;/button&gt;
-</code></pre><p>这种方式问题多多：时差问题和作用域问题，还有就是HMTL代码和JS代码紧密耦合，这可是设计上的大忌。</p>
-<p>第一稿写于2017.10.1</p>
-<hr>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/01/JS-Event/" data-id="cj8imchlg0003e6jxj6uu3zxa" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-ES6-class" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/09/30/ES6-class/" class="article-date">
-  <time datetime="2017-09-30T14:21:11.000Z" itemprop="datePublished">2017-09-30</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/30/ES6-class/">ES6-class</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="ES6带来了类"><a href="#ES6带来了类" class="headerlink" title="ES6带来了类"></a>ES6带来了类</h1><h2 id="类的使用"><a href="#类的使用" class="headerlink" title="类的使用"></a>类的使用</h2><p>JavaScript本身就是面向对象的，只是相比于传统的面向对象语言，它的面向对象总是让人感到比较困惑，最主要的原因就是虽然是面向对象，但是没有<strong>类</strong>。看下面一个例子，传统方法创建一个对象实例，需要借助构造函数和原型对象。</p>
-<pre><code>function Point(x, y) {
-    this.x = x;
-    this.y = y;
-}
-Point.prototype.toString = function() {
-    return &apos;(&apos; + this.x + &apos;,&apos; + this.y + &apos;)&apos;;
-};
-var p = new Point(1,2);
-console.log(p);                // Point {x: 1, y: 2}
-console.log(p.toString());     // (1,2)
-</code></pre><p>再次感谢ES6为我们带来了类，让我们可以像传统面向对象语言那样定义类class。这一次我们使用类class重新改写上面的例子。</p>
-<pre><code>class Point {
-    // 构造方法
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-    toString() {
-        return &apos;(&apos; + this.x + &apos;,&apos; + this.y + &apos;)&apos;;
-    }
-}
-var p = new Point(1,2);
-console.log(p);                // Point {x: 1, y: 2}
-console.log(p.toString());     // (1,2)
-</code></pre><p>比较上面两个例子，引入类之后，明显更加符合面向对象编程的语法，但实际在实现上并没有多大改变。先解释一下构造方法constructor()，和其他面向对象编程语言的功能是一样，在实例化对象时候自动执行，其中this指向实例对象。</p>
-<h2 id="类是函数"><a href="#类是函数" class="headerlink" title="类是函数"></a>类是函数</h2><p>ES6的类和构造函数没有什么本质的区别，就是改写了一下，让它变得更像我们所熟悉的传统面向对象编程中的类。我们知道JavaScript的数据类型（5种基本数据类型和一种引用数据类型），那么类属于哪一种数据类型，我们使用typeof操作符来看一下：</p>
-<pre><code>class Person {}
-var p = new Person();
-console.log(typeof Person);   // function
-console.log(Person === Person.prototype.constructor);  // true
-console.log(p.constructor === Person.prototype.constructor);  // true
-</code></pre><p>很明显，类的数据类型是function，说明它和构造函数没有什么区别，第二行说明类本身指向了它的原型对象的constructor(构造函数)属性，这也是构造函数的性质，所以类不过就是把构造函数重新改写了一遍，让人更容易理解。使用类来创建对象实例也是使用new，和构造函数的用法完全一致。</p>
-<p>现在，有一点已经明白了，类并没有带来什么新的东西，<strong>类不过是对构造函数的改写</strong>，在类里面写的方法，其实都定义在它的原型对象的属性上去了。另外对象实例的constructor方法就是类的原型对象的constructor方法，这又和构造函数创建对象实例是一致的。</p>
-<blockquote>
-<p>类和模块的内部，默认都是严格模式，不需要使用‘use strict’来指定。</p>
-</blockquote>
-<h2 id="类的constructor方法"><a href="#类的constructor方法" class="headerlink" title="类的constructor方法"></a>类的constructor方法</h2><p><strong>constructor方法</strong>是类的默认方法，通过new命令生成对象实例时，自动调用该方法。之前也说过了，该方法和传统面向对象编程语言里的用法是一样的，生成对象实例时自动调用。如果没有定义的话，会默认添加一个空的constructor方法。</p>
-<p>constructor方法默认返回实例对象（即this），完全可以指定返回另外一个对象（谁不正常会这样做），所以在constructor方法一般就不要写return了，让它默认返回实例对象好了。比如下面这样：</p>
-<pre><code>class Person {
-    constructor() {}
-}
-var p = new Person();
-console.log(p instanceof Person);     // true
-</code></pre><h2 id="类的对象实例"><a href="#类的对象实例" class="headerlink" title="类的对象实例"></a>类的对象实例</h2><ol>
-<li><p><strong>生成类的对象实例，必须要用new</strong>，这和构造函数生成对象实例是一样的，new绑定了this到对象实例。</p>
-</li>
-<li><p>实例的属性除非显式定义在其本身（this对象），否则都是定义在原型上（class上）。对象实例的属分为实例属性和原型属性。第一个例子，写在构造函数里，直接定义在this对象上的就是实例属性 <em>this.x = x;</em> ，写在原型对象上的属性 <em>Point.prototype.toString</em> 就是原型属性（所有对象实例共享）。</p>
-</li>
-<li><p>类的所有对象实例共享一个原型对象，不解释了。</p>
-</li>
-</ol>
-<h2 id="类class表达式"><a href="#类class表达式" class="headerlink" title="类class表达式"></a>类class表达式</h2><p>类的数据类型是函数，函数有的类肯定也有，所以类可以用表达式来定义也没有什么奇怪的。写到这里越来越觉得，类就是把函数的function换成了class，当然还有一些小小的改动。</p>
-<p>函数表达式在JavaScript是一个很重要的概念，这里不具体解释，看一个例子：</p>
-<pre><code>var myFunc = function() {
-    console.log(&apos;I am function.&apos;);
-};
-myFunc();       // I am function.
-</code></pre><p>类比函数表达式，可以写类表达式：</p>
-<pre><code>var myClass = class {
-    sayHi() {
-        console.log(&apos;I am function.&apos;);
-    }
-};
-var ins = new myClass();
-ins.sayHi();   // I am function.
-</code></pre><p>同样还有立即执行函数，自然也有立即执行类，生成一个对象实例，看下面这个例子：</p>
-<pre><code>var person = new class Person {
-    constructor(name) {
-        this.name = name;
-    }
-    sayHi() {
-        console.log(&apos;Hi, I am &apos; + this.name);
-    }
-}(&apos;Tom&apos;);
-person.sayHi();     // Hi, I am Tom
-</code></pre><p>也没什么解释的，定义类的时候直接new生成一个对象实例。</p>
-<h2 id="类不存在变量提升"><a href="#类不存在变量提升" class="headerlink" title="类不存在变量提升"></a>类不存在变量提升</h2><p>一句话<strong>先定义，后使用</strong>。</p>
-<h2 id="私有属性和方法"><a href="#私有属性和方法" class="headerlink" title="私有属性和方法"></a>私有属性和方法</h2><p>ES6暂不支持，提案为属性加前缀‘#’表示为私有属性，貌似还不能使用现在，暂时pass。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/09/30/ES6-class/" data-id="cj8imchky0000e6jxnldi7bsx" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/01/JS-Event-performance/" data-id="cj8mfq5z00002atjxo94evso6" class="article-share-link">Share</a>
       
       
     </footer>
@@ -1161,6 +1131,14 @@ person.sayHi();     // Hi, I am Tom
       <ul>
         
           <li>
+            <a href="/2017/10/11/function/">函数，JavaScript 的第一等公民</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/09/webpack/">webpack 模块打包机</a>
+          </li>
+        
+          <li>
             <a href="/2017/10/08/JSON/">JavaScript 和 JSON</a>
           </li>
         
@@ -1170,14 +1148,6 @@ person.sayHi();     // Hi, I am Tom
         
           <li>
             <a href="/2017/10/07/http/">HTTP 概述</a>
-          </li>
-        
-          <li>
-            <a href="/2017/10/07/prototype/">继承，从原型链说起</a>
-          </li>
-        
-          <li>
-            <a href="/2017/10/05/closure/">闭包，从作用域链说起</a>
           </li>
         
       </ul>
